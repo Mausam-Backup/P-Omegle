@@ -5,6 +5,7 @@ import { matchmakingEngine } from '../services/matchmaking/matchmakingEngine.js'
 import { sessionManager } from '../services/session/sessionManager.js';
 import { signalingRelay } from '../services/signaling/signalingRelay.js';
 import { presenceTracker } from '../services/presence/presenceTracker.js';
+import { log } from '../utils/logger.js';
 
 class RealtimeGateway {
   constructor() {
@@ -77,6 +78,8 @@ class RealtimeGateway {
       isGuest: !user
     });
 
+    log.wsConnect(userId, this.clients.size);
+
     // Handle incoming messages
     ws.on('message', (data) => {
       try {
@@ -121,9 +124,12 @@ class RealtimeGateway {
             estimatedWaitMs: 1500
           });
 
+          log.queueJoin(userId, mode, interests, matchmakingEngine.getQueueSize());
+
           // Trigger immediate evaluation
           this.broadcastMatches();
         } catch (err) {
+          console.error(`[QUEUE] ❌ Queue error for ${userId}:`, err.message);
           this.send(socket, 'error', { message: err.message });
         }
         break;
@@ -132,6 +138,7 @@ class RealtimeGateway {
       case 'leave_queue': {
         matchmakingEngine.leaveQueue(userId);
         this.send(socket, 'queue_left', {});
+        log.queueLeave(userId);
         break;
       }
 
@@ -139,6 +146,7 @@ class RealtimeGateway {
       case 'skip': {
         const { sessionId, autoRequeue = true, mode = 'video', interests = [], language = 'en' } = payload;
         const result = sessionManager.skipSession(sessionId, userId);
+        log.skip(userId, sessionId);
 
         // Notify partner immediately if online
         if (result.partnerId) {
@@ -168,10 +176,11 @@ class RealtimeGateway {
         break;
       }
 
-      // 3. WebRTC Signaling Relay (offer, answer, candidate)
+      // 3. WebRTC Signaling Relay (offer, answer, candidate, media_state)
       case 'offer':
       case 'answer':
-      case 'ice_candidate': {
+      case 'ice_candidate':
+      case 'media_state': {
         const { sessionId } = payload;
         const relayResult = signalingRelay.processSignal({
           sessionId,
@@ -184,6 +193,9 @@ class RealtimeGateway {
           const partnerClient = this.clients.get(relayResult.partnerId);
           if (partnerClient && partnerClient.socket.readyState === WebSocket.OPEN) {
             this.send(partnerClient.socket, action, relayResult.forwardEnvelope);
+            if (action !== 'ice_candidate') {
+              log.rtc(action, userId, relayResult.partnerId);
+            }
           }
         }
         break;
@@ -205,6 +217,9 @@ class RealtimeGateway {
           const partnerClient = this.clients.get(relayResult.partnerId);
           if (partnerClient && partnerClient.socket.readyState === WebSocket.OPEN) {
             this.send(partnerClient.socket, action, relayResult.forwardEnvelope);
+            if (action === 'chat_message') {
+              log.chat(userId, payload?.text);
+            }
           }
         }
         break;
@@ -242,6 +257,8 @@ class RealtimeGateway {
         sharedInterests
       });
 
+      log.match(peerA.userId, peerB.userId, sessionId, mode, sharedInterests);
+
       const clientA = this.clients.get(peerA.userId);
       const clientB = this.clients.get(peerB.userId);
 
@@ -273,6 +290,8 @@ class RealtimeGateway {
     this.socketToUser.delete(socket);
     presenceTracker.unregisterPresence(userId);
     matchmakingEngine.leaveQueue(userId);
+
+    log.wsDisconnect(userId, this.clients.size);
 
     // Grace period handling
     sessionManager.handleDisconnect(userId, (sessionId, partnerId) => {

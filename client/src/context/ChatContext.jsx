@@ -42,6 +42,7 @@ export function ChatProvider({ children }) {
   const [stats, setStats] = useState({ onlineUsers: 1420, waitingInQueue: 12 });
 
   const signalListenersRef = useRef(new Map());
+  const signalQueueRef = useRef([]); // Buffers early WebRTC signals until listener registers
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
 
@@ -61,6 +62,29 @@ export function ChatProvider({ children }) {
     }
     return () => clearInterval(interval);
   }, [chatStatus, isLive]);
+
+  // Search duration counter (seconds spent searching)
+  const [searchDuration, setSearchDuration] = useState(0);
+  useEffect(() => {
+    let interval = null;
+    if (chatStatus === 'searching') {
+      interval = setInterval(() => {
+        setSearchDuration(prev => prev + 1);
+      }, 1000);
+    } else {
+      setSearchDuration(0);
+    }
+    return () => clearInterval(interval);
+  }, [chatStatus]);
+
+  // Partner left info (when stranger disconnects)
+  const [partnerLeftInfo, setPartnerLeftInfo] = useState(null);
+
+  // Partner media state (when stranger mutes audio or disables video)
+  const [partnerMediaState, setPartnerMediaState] = useState({
+    isAudioMuted: false,
+    isVideoOff: false
+  });
 
   // Format MM:SS (e.g. 1:23)
   const formatLiveDuration = (totalSeconds) => {
@@ -138,10 +162,14 @@ export function ChatProvider({ children }) {
         // ── Transition to call view ──────────────────────────────────────────
         // Both peers must switch to 'call' view on receiving this event.
         // Previously this was missing, so peers stayed on the lobby screen.
+        signalQueueRef.current = [];
         setCurrentView('call');
         setChatStatus('matched');
         setIsLive(true);
         setCallDuration(0);
+        setSearchDuration(0);
+        setPartnerLeftInfo(null);
+        setPartnerMediaState({ isAudioMuted: false, isVideoOff: false });
         setSessionId(data.sessionId);
         setPeerRole(data.role);
         setSharedInterests(data.sharedInterests || []);
@@ -171,17 +199,26 @@ export function ChatProvider({ children }) {
 
       case 'partner_left': {
         sounds.playDisconnectSound();
+        setPartnerLeftInfo({
+          duration: callDuration,
+          reason: data?.reason || 'Stranger has left the conversation.'
+        });
+        setChatStatus('partner_left');
+        setIsLive(false);
         setSessionId(null);
         setPeerRole(null);
         setPartnerId(null);
-        setCallDuration(0);
-        setMessages([]);
-        setChatStatus('searching');
-        sendWs('join_queue', {
-          mode: 'video',
-          interests,
-          language: navigator.language || 'en'
-        });
+        setPartnerMediaState({ isAudioMuted: false, isVideoOff: false });
+        break;
+      }
+
+      case 'media_state': {
+        if (data?.payload) {
+          setPartnerMediaState(prev => ({
+            ...prev,
+            ...data.payload
+          }));
+        }
         break;
       }
 
@@ -219,6 +256,9 @@ export function ChatProvider({ children }) {
         const handler = signalListenersRef.current.get(event);
         if (handler) {
           handler(data);
+        } else {
+          console.log(`[WS] Buffering signal '${event}' for session ${data?.sessionId || data?.payload?.sessionId}`);
+          signalQueueRef.current.push({ event, data, timestamp: Date.now() });
         }
         break;
       }
@@ -240,6 +280,23 @@ export function ChatProvider({ children }) {
 
   const registerSignalListener = useCallback((signalType, callback) => {
     signalListenersRef.current.set(signalType, callback);
+
+    // Flush any pending early signals of this type
+    const remaining = [];
+    signalQueueRef.current.forEach((item) => {
+      if (item.event === signalType) {
+        try {
+          console.log(`[WS] Dispatching buffered signal '${signalType}'`);
+          callback(item.data);
+        } catch (err) {
+          console.error(`[WS] Error in buffered signal handler '${signalType}':`, err);
+        }
+      } else {
+        remaining.push(item);
+      }
+    });
+    signalQueueRef.current = remaining;
+
     return () => {
       signalListenersRef.current.delete(signalType);
     };
@@ -296,6 +353,9 @@ export function ChatProvider({ children }) {
     setCurrentView('call');
     setChatStatus('searching');
     setCallDuration(0);
+    setSearchDuration(0);
+    setPartnerLeftInfo(null);
+    setPartnerMediaState({ isAudioMuted: false, isVideoOff: false });
     setSessionId(null);
     setPeerRole(null);
     setPartnerId(null);
@@ -307,6 +367,37 @@ export function ChatProvider({ children }) {
       language: navigator.language || 'en'
     });
   }, [interests, sendWs]);
+
+  // Find Next Stranger (from Partner Left or Skip)
+  const findNextStranger = useCallback(() => {
+    setPartnerLeftInfo(null);
+    setChatStatus('searching');
+    setCallDuration(0);
+    setSearchDuration(0);
+    setSessionId(null);
+    setPeerRole(null);
+    setPartnerId(null);
+    setMessages([]);
+    setIsLive(true);
+    setPartnerMediaState({ isAudioMuted: false, isVideoOff: false });
+    sendWs('join_queue', {
+      mode: 'video',
+      interests,
+      language: navigator.language || 'en'
+    });
+  }, [interests, sendWs]);
+
+  // Clear Interests and Instant Fallback Match
+  const clearInterestsAndSearch = useCallback(() => {
+    setInterests([]);
+    setSearchDuration(0);
+    setChatStatus('searching');
+    sendWs('join_queue', {
+      mode: 'video',
+      interests: [],
+      language: navigator.language || 'en'
+    });
+  }, [sendWs]);
 
   // Send in-call text chat message
   const sendMessage = (text) => {
@@ -356,6 +447,11 @@ export function ChatProvider({ children }) {
         partner,
         callDuration,
         formatLiveDuration,
+        searchDuration,
+        partnerLeftInfo,
+        partnerMediaState,
+        findNextStranger,
+        clearInterestsAndSearch,
         isLive,
         isChatOpen,
         setIsChatOpen,

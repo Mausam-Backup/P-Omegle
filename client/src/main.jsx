@@ -7,13 +7,11 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 import App from './App.jsx';
 
 createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <AuthProvider>
-        <ChatProvider>
-          <App />
-        </ChatProvider>
-      </AuthProvider>
-    </ErrorBoundary>
-  </React.StrictMode>
+  <ErrorBoundary>
+    <AuthProvider>
+      <ChatProvider>
+        <App />
+      </ChatProvider>
+    </AuthProvider>
+  </ErrorBoundary>
 );

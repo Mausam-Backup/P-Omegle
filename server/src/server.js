@@ -5,6 +5,7 @@ import { config } from './config/env.js';
 import { apiRouter } from './gateway/apiGateway.js';
 import { realtimeGateway } from './gateway/realtimeGateway.js';
 import { rateLimiter } from './middleware/rateLimiter.js';
+import { log } from './utils/logger.js';
 
 const app = express();
 
@@ -22,6 +23,15 @@ app.use(cors({
 
 app.use(express.json());
 app.use(rateLimiter);
+
+// Clean HTTP Request Logger (silences routine polling clutter)
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    log.http(req.method, req.originalUrl, res.statusCode, Date.now() - start);
+  });
+  next();
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {

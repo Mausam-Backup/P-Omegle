@@ -1,11 +1,42 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
-import { Mic, MicOff, Video, VideoOff, Sliders, LogOut, ArrowLeftRight, X, Camera } from 'lucide-react';
-import { DoodleStranger, DoodleCameraOff, DoodleSearching, DoodleAvatarHead } from '../doodles/DoodleCharacter';
+import {
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Sliders,
+  LogOut,
+  ArrowLeftRight,
+  X,
+  Camera,
+  UserX,
+  Sparkles,
+  AlertCircle
+} from 'lucide-react';
+import {
+  DoodleStranger,
+  DoodleCameraOff,
+  DoodleSearching,
+  DoodleAvatarHead
+} from '../doodles/DoodleCharacter';
 
 export function LiveVideoStage({ webrtc }) {
-  const { callDuration, formatLiveDuration, switchUser, endCall, chatStatus } = useChat();
+  const {
+    callDuration,
+    formatLiveDuration,
+    switchUser,
+    endCall,
+    chatStatus,
+    searchDuration,
+    partnerLeftInfo,
+    partnerMediaState,
+    findNextStranger,
+    clearInterestsAndSearch,
+    interests
+  } = useChat();
+
   const { setIsSettingsModalOpen } = useAuth();
   const {
     localStream,
@@ -14,6 +45,7 @@ export function LiveVideoStage({ webrtc }) {
     isAudioMuted,
     isVideoOff,
     isMirrored,
+    connectionState,
     toggleMute,
     toggleVideo
   } = webrtc;
@@ -21,8 +53,67 @@ export function LiveVideoStage({ webrtc }) {
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
 
+  // Auto-search countdown after partner leaves
+  const [partnerLeftCountdown, setPartnerLeftCountdown] = useState(5);
+  const [isAutoSearchPaused, setIsAutoSearchPaused] = useState(false);
+
+  useEffect(() => {
+    let timer = null;
+    if (chatStatus === 'partner_left' && !isAutoSearchPaused) {
+      setPartnerLeftCountdown(5);
+      timer = setInterval(() => {
+        setPartnerLeftCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            findNextStranger();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      setPartnerLeftCountdown(5);
+    }
+    return () => clearInterval(timer);
+  }, [chatStatus, isAutoSearchPaused, findNextStranger]);
+
+  // Global Keyboard shortcuts: Space (skip/find next), M (mute), V (video), Esc (end)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(e.target?.tagName)) return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (chatStatus === 'partner_left') {
+          findNextStranger();
+        } else if (chatStatus === 'matched') {
+          switchUser();
+        }
+      } else if (e.key === 'm' || e.key === 'M') {
+        toggleMute();
+      } else if (e.key === 'v' || e.key === 'V') {
+        toggleVideo();
+      } else if (e.key === 'Escape') {
+        endCall();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [chatStatus, findNextStranger, switchUser, toggleMute, toggleVideo, endCall]);
+
   // A feed is live when remote video track is active & enabled
-  const isRemoteLive = Boolean(remoteStream && isRemoteVideoLive);
+  const hasRemoteVideo = Boolean(
+    remoteStream &&
+    remoteStream.getVideoTracks().length > 0 &&
+    remoteStream.getVideoTracks().some(t => t.enabled && t.readyState !== 'ended')
+  );
+
+  const isRemoteLive = Boolean(
+    (hasRemoteVideo || isRemoteVideoLive) &&
+    !partnerMediaState?.isVideoOff &&
+    chatStatus === 'matched'
+  );
 
   const isLocalLive = Boolean(
     localStream &&
@@ -46,14 +137,16 @@ export function LiveVideoStage({ webrtc }) {
     }
   }, [localStream]);
 
-  // Bind remote stranger feed once per session, avoiding pipeline resets
+  // Bind remote stranger feed once per session, ensuring prompt playback
   useEffect(() => {
     const videoEl = remoteVideoRef.current;
     if (!videoEl) return;
 
-    if (remoteStream) {
+    if (remoteStream && remoteStream.getTracks().length > 0) {
       if (videoEl.srcObject !== remoteStream) {
         videoEl.srcObject = remoteStream;
+      }
+      const attemptPlay = () => {
         const playPromise = videoEl.play();
         if (playPromise !== undefined) {
           playPromise.catch((err) => {
@@ -74,14 +167,30 @@ export function LiveVideoStage({ webrtc }) {
             window.addEventListener('touchstart', unmuteOnGesture);
           });
         }
-      }
-    } else {
+      };
+      attemptPlay();
+      videoEl.onloadedmetadata = attemptPlay;
+    } else if (!remoteStream || chatStatus !== 'matched') {
       videoEl.srcObject = null;
     }
-  }, [remoteStream]);
+  }, [remoteStream, chatStatus]);
 
   return (
     <div className="live-stage-container">
+      {/* Top Floating P2P Connection Status Toast */}
+      {connectionState === 'connecting' && chatStatus === 'matched' && (
+        <div className="connection-toast info">
+          <span className="clean-spinner-sm"></span>
+          <span>Connecting direct video feed...</span>
+        </div>
+      )}
+      {connectionState === 'disconnected' && chatStatus === 'matched' && (
+        <div className="connection-toast warning">
+          <AlertCircle size={14} />
+          <span>Connection dropped • Reconnecting to stranger...</span>
+        </div>
+      )}
+
       {/* Dual Video Grid */}
       <div className="dual-video-grid">
         {/* Left Card: Remote Partner */}
@@ -98,6 +207,22 @@ export function LiveVideoStage({ webrtc }) {
             }}
           />
 
+          {/* Floating Pill: Stranger is Muted */}
+          {chatStatus === 'matched' && partnerMediaState?.isAudioMuted && (
+            <div className="remote-media-pill muted" title="Stranger's microphone is muted">
+              <MicOff size={13} strokeWidth={2.5} />
+              <span>Stranger is muted</span>
+            </div>
+          )}
+
+          {/* Floating Pill: Stranger's Camera is Off */}
+          {chatStatus === 'matched' && partnerMediaState?.isVideoOff && isRemoteLive && (
+            <div className="remote-media-pill camera-off" title="Stranger's camera is turned off">
+              <VideoOff size={13} strokeWidth={2.5} />
+              <span>Stranger's camera is off</span>
+            </div>
+          )}
+
           <div
             className="doodle-surface-wrapper"
             style={{
@@ -106,7 +231,105 @@ export function LiveVideoStage({ webrtc }) {
               zIndex: !isRemoteLive ? 2 : 1
             }}
           >
-            {chatStatus === 'searching' ? (
+            {/* STATE 1: Partner Left */}
+            {chatStatus === 'partner_left' ? (
+              <div className="partner-left-surface">
+                <div className="partner-left-avatar-ring">
+                  <DoodleAvatarHead seed="stranger" size={60} />
+                  <span className="partner-left-badge-icon">
+                    <UserX size={15} />
+                  </span>
+                </div>
+                <h3 className="partner-left-title">Stranger has left the chat</h3>
+                <p className="partner-left-subtitle">
+                  {partnerLeftInfo?.duration > 0
+                    ? `Conversation lasted ${formatLiveDuration(partnerLeftInfo.duration)}`
+                    : 'The stranger has disconnected from this room.'}
+                </p>
+
+                <div className="partner-left-countdown-box">
+                  <div className="countdown-label-row">
+                    <span>Auto-searching next match in <strong>{partnerLeftCountdown}s</strong></span>
+                    {!isAutoSearchPaused && (
+                      <button
+                        type="button"
+                        className="pause-countdown-link"
+                        onClick={() => setIsAutoSearchPaused(true)}
+                      >
+                        Pause
+                      </button>
+                    )}
+                  </div>
+                  <div className="countdown-progress-bar">
+                    <div
+                      className="countdown-progress-fill"
+                      style={{ width: `${(partnerLeftCountdown / 5) * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="partner-left-actions-row">
+                  <button
+                    type="button"
+                    className="find-next-primary-btn"
+                    onClick={findNextStranger}
+                  >
+                    <ArrowLeftRight size={15} strokeWidth={2.5} />
+                    <span>Find Next Stranger</span>
+                    <kbd className="shortcut-kbd">Space</kbd>
+                  </button>
+                  <button
+                    type="button"
+                    className="cancel-lobby-btn"
+                    onClick={endCall}
+                  >
+                    Return to Lobby
+                  </button>
+                </div>
+              </div>
+            ) : chatStatus === 'searching' && searchDuration >= 15 ? (
+              /* STATE 2: No Users Found / Search Timeout */
+              <div className="no-users-found-surface">
+                <DoodleSearching className="doodle-graphic searching-animated" style={{ maxWidth: 110, maxHeight: 110 }} />
+                <h3 className="no-users-title">No users found right now</h3>
+                <p className="no-users-sub">
+                  {interests.length > 0
+                    ? `No one online matches #${interests.join(', #')} at this moment.`
+                    : 'No available strangers in queue right now. You can keep waiting or try again.'}
+                </p>
+
+                <div className="no-users-actions">
+                  {interests.length > 0 && (
+                    <button
+                      type="button"
+                      className="clear-tags-btn"
+                      onClick={clearInterestsAndSearch}
+                    >
+                      <Sparkles size={14} />
+                      <span>Clear Tags & Match Anyone</span>
+                    </button>
+                  )}
+                  <div className="no-users-btn-group">
+                    <button
+                      type="button"
+                      className="keep-waiting-btn"
+                      onClick={() => {}}
+                    >
+                      <span className="clean-spinner-sm"></span>
+                      <span>Still Searching ({searchDuration}s)</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="lobby-return-link-btn"
+                      onClick={endCall}
+                    >
+                      Return to Lobby
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : chatStatus === 'searching' ? (
+              /* STATE 3: Standard Searching */
               <div className="doodle-searching-box">
                 <DoodleSearching className="doodle-graphic searching-animated" />
                 <div className="doodle-caption-box">
@@ -117,15 +340,31 @@ export function LiveVideoStage({ webrtc }) {
                       <span>.</span><span>.</span><span>.</span>
                     </span>
                   </span>
+                  <span className="search-elapsed-badge">{searchDuration}s</span>
                 </div>
+                {interests.length > 0 && searchDuration >= 5 && (
+                  <div className="search-tags-hint">
+                    Looking for tags: <strong>#{interests.join(', #')}</strong>
+                  </div>
+                )}
               </div>
-            ) : (
+            ) : partnerMediaState?.isVideoOff ? (
+              /* STATE 4: Stranger Deliberately Turned Off Camera */
               <>
                 <DoodleStranger className="doodle-graphic" />
                 <div className="doodle-caption-box">
                   <span className="doodle-status-text">Stranger's camera is off</span>
                 </div>
               </>
+            ) : (
+              /* STATE 5: P2P Stream Connecting */
+              <div className="doodle-searching-box">
+                <DoodleSearching className="doodle-graphic searching-animated" style={{ maxWidth: 100, maxHeight: 100 }} />
+                <div className="doodle-caption-box">
+                  <span className="clean-spinner"></span>
+                  <span className="doodle-status-text">Connecting video feed...</span>
+                </div>
+              </div>
             )}
           </div>
 
@@ -150,6 +389,14 @@ export function LiveVideoStage({ webrtc }) {
               zIndex: isLocalLive ? 2 : 1
             }}
           />
+
+          {/* Local Muted Alert Badge */}
+          {isAudioMuted && (
+            <div className="local-media-pill muted" title="Your microphone is muted">
+              <MicOff size={13} strokeWidth={2.5} />
+              <span>You are muted</span>
+            </div>
+          )}
 
           <div
             className="doodle-surface-wrapper"
@@ -188,7 +435,13 @@ export function LiveVideoStage({ webrtc }) {
           {chatStatus === 'searching' ? (
             <div className="live-dot-indicator searching">
               <span className="pulsing-searching-dot"></span>
-              <span className="live-text" style={{ color: '#d97706' }}>CONNECTING</span>
+              <span className="live-text" style={{ color: '#d97706' }}>SEARCHING</span>
+              <span className="search-pill-time">{searchDuration}s</span>
+            </div>
+          ) : chatStatus === 'partner_left' ? (
+            <div className="live-dot-indicator partner-left">
+              <span className="live-dot-static-gray"></span>
+              <span className="live-text" style={{ color: '#64748b' }}>LEFT</span>
             </div>
           ) : (
             <div className="live-dot-indicator">
@@ -197,7 +450,7 @@ export function LiveVideoStage({ webrtc }) {
               <span className="live-timer">{formatLiveDuration(callDuration)}</span>
             </div>
           )}
-          <button className="end-call-sub-btn" onClick={endCall} title="End Conversation">
+          <button className="end-call-sub-btn" onClick={endCall} title="End Conversation (Esc)">
             <X size={14} strokeWidth={2.5} />
             <span>End</span>
           </button>
@@ -208,7 +461,7 @@ export function LiveVideoStage({ webrtc }) {
           <button
             className={`control-circle-btn ${isAudioMuted ? 'muted' : ''}`}
             onClick={toggleMute}
-            title={isAudioMuted ? "Unmute Microphone" : "Mute Microphone"}
+            title={isAudioMuted ? "Unmute Microphone (M)" : "Mute Microphone (M)"}
           >
             {isAudioMuted ? <MicOff size={19} /> : <Mic size={19} />}
           </button>
@@ -216,7 +469,7 @@ export function LiveVideoStage({ webrtc }) {
           <button
             className={`control-circle-btn ${isVideoOff ? 'disabled' : ''}`}
             onClick={toggleVideo}
-            title={isVideoOff ? "Turn Video On" : "Turn Video Off"}
+            title={isVideoOff ? "Turn Video On (V)" : "Turn Video Off (V)"}
           >
             {isVideoOff ? <VideoOff size={19} /> : <Video size={19} />}
           </button>
@@ -232,7 +485,7 @@ export function LiveVideoStage({ webrtc }) {
           <button
             className="control-rounded-btn red-exit-btn"
             onClick={endCall}
-            title="Leave Call"
+            title="Leave Call (Esc)"
           >
             <LogOut size={18} />
           </button>
@@ -241,10 +494,10 @@ export function LiveVideoStage({ webrtc }) {
         {/* Right: Switch User ⇄ Pill Button */}
         <button
           className="switch-user-btn"
-          onClick={switchUser}
-          title="Switch User (Press Spacebar)"
+          onClick={chatStatus === 'partner_left' ? findNextStranger : switchUser}
+          title="Switch User / Next Stranger (Press Spacebar)"
         >
-          <span>Switch User</span>
+          <span>{chatStatus === 'partner_left' ? 'Find Next' : 'Switch User'}</span>
           <ArrowLeftRight size={17} strokeWidth={2.5} />
         </button>
       </div>

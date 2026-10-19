@@ -418,6 +418,390 @@ html, body {
   font-weight: 600;
 }
 
+/* Floating Status Pills on Video Cards */
+.remote-media-pill,
+.local-media-pill {
+  position: absolute;
+  top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  z-index: 12;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.02em;
+}
+
+.remote-media-pill.muted {
+  right: 14px;
+  background: rgba(239, 68, 68, 0.9);
+  color: #ffffff;
+  border: 1px solid rgba(254, 202, 202, 0.3);
+}
+
+.remote-media-pill.camera-off {
+  left: 14px;
+  background: rgba(30, 41, 59, 0.85);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.local-media-pill.muted {
+  right: 14px;
+  background: rgba(239, 68, 68, 0.9);
+  color: #ffffff;
+  border: 1px solid rgba(254, 202, 202, 0.3);
+}
+
+/* Top Connection Toast */
+.connection-toast {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 25;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(8px);
+  animation: slideDownToast 0.25s ease-out;
+}
+
+@keyframes slideDownToast {
+  from { opacity: 0; transform: translate(-50%, -10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.connection-toast.info {
+  background: rgba(238, 242, 255, 0.95);
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+}
+
+.connection-toast.warning {
+  background: rgba(254, 243, 199, 0.95);
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.clean-spinner-sm {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  display: inline-block;
+}
+
+/* Search Elapsed & Tags Hints */
+.search-elapsed-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6366f1;
+  background: #eef2ff;
+  padding: 0.2rem 0.55rem;
+  border-radius: 12px;
+  margin-left: 0.35rem;
+}
+
+.search-tags-hint {
+  margin-top: 0.65rem;
+  font-size: 0.78rem;
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 0.3rem 0.75rem;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+}
+
+.search-pill-time {
+  font-size: 0.75rem;
+  color: #b45309;
+  font-weight: 700;
+}
+
+/* ==============================================================================
+   STATE: Partner Left Overlay Surface
+   ============================================================================== */
+.partner-left-surface {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  max-width: 380px;
+  width: 100%;
+  animation: fadeInState 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInState {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.partner-left-avatar-ring {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.partner-left-badge-icon {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 26px;
+  height: 26px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+}
+
+.partner-left-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.01em;
+}
+
+.partner-left-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0 0 1.25rem 0;
+}
+
+.partner-left-countdown-box {
+  width: 100%;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.countdown-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #475569;
+  margin-bottom: 0.45rem;
+}
+
+.pause-countdown-link {
+  background: none;
+  border: none;
+  color: #6366f1;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.pause-countdown-link:hover {
+  text-decoration: underline;
+}
+
+.countdown-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.countdown-progress-fill {
+  height: 100%;
+  background: #6366f1;
+  transition: width 1s linear;
+}
+
+.partner-left-actions-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.find-next-primary-btn {
+  background: #6366f1;
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+.find-next-primary-btn:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+}
+
+.shortcut-kbd {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.1rem 0.4rem;
+  border-radius: 5px;
+  font-size: 0.7rem;
+  font-family: inherit;
+  font-weight: 700;
+  margin-left: 0.25rem;
+}
+
+.cancel-lobby-btn {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.825rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.cancel-lobby-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* ==============================================================================
+   STATE: No Users Found / Timeout Surface
+   ============================================================================== */
+.no-users-found-surface {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5rem 1.25rem;
+  max-width: 380px;
+  width: 100%;
+  animation: fadeInState 0.3s ease-out;
+}
+
+.no-users-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0.5rem 0 0.35rem 0;
+}
+
+.no-users-sub {
+  font-size: 0.825rem;
+  color: #64748b;
+  margin: 0 0 1.25rem 0;
+  line-height: 1.4;
+}
+
+.no-users-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.clear-tags-btn {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  color: #4f46e5;
+  padding: 0.65rem 1rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.825rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.clear-tags-btn:hover {
+  background: #e0e7ff;
+  transform: translateY(-1px);
+}
+
+.no-users-btn-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.keep-waiting-btn {
+  flex: 1;
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.keep-waiting-btn:hover {
+  background: #1e293b;
+}
+
+.lobby-return-link-btn {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.lobby-return-link-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Controls Bar Indicators */
+.live-dot-indicator.partner-left {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.live-dot-static-gray {
+  width: 7px;
+  height: 7px;
+  background-color: #94a3b8;
+  border-radius: 50%;
+}
+
 /* ==============================================================================
    4. Bottom Floating Controls Bar (Exact Image Match)
    ============================================================================== */
