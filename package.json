@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Modern Omegle-style Random Video and Text Chat Platform",
   "private": true,
+  "type": "module",
   "workspaces": [
     "server",
     "client"
@@ -13,7 +14,8 @@
     "dev:client": "npm run dev --prefix client",
     "dev": "concurrently -n \"SERVER,CLIENT\" -c \"cyan,magenta\" \"npm run dev:server\" \"npm run dev:client\"",
     "build:client": "npm run build --prefix client",
-    "start": "npm start --prefix server"
+    "start": "npm start --prefix server",
+    "test:simulation": "node tests/multi_user_simulation.js"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
