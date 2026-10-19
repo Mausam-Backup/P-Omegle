@@ -45,6 +45,12 @@ export function ChatProvider({ children }) {
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
 
+  // ── Stale-closure fix ──────────────────────────────────────────────────────
+  // Keep a ref that always points to the LATEST handleSocketEvent.
+  // The ws.onmessage callback (created once) reads through the ref so it never
+  // captures stale state.
+  const handleSocketEventRef = useRef(null);
+
   // Call duration counter
   useEffect(() => {
     let interval = null;
@@ -97,7 +103,8 @@ export function ChatProvider({ children }) {
     ws.onmessage = (event) => {
       try {
         const { event: evtName, data } = JSON.parse(event.data);
-        handleSocketEvent(evtName, data);
+        // Always invoke the latest handler via ref — avoids stale closure bug
+        handleSocketEventRef.current?.(evtName, data);
       } catch (err) {
         console.error('[WS] Error parsing message', err);
       }
@@ -128,6 +135,10 @@ export function ChatProvider({ children }) {
 
       case 'matched': {
         sounds.playMatchChime();
+        // ── Transition to call view ──────────────────────────────────────────
+        // Both peers must switch to 'call' view on receiving this event.
+        // Previously this was missing, so peers stayed on the lobby screen.
+        setCurrentView('call');
         setChatStatus('matched');
         setIsLive(true);
         setCallDuration(0);
@@ -143,6 +154,20 @@ export function ChatProvider({ children }) {
         });
         break;
       }
+
+      case 'session_restored': {
+        // Reconnected to a session within the grace period
+        setCurrentView('call');
+        setChatStatus('matched');
+        setIsLive(true);
+        setSessionId(data.sessionId);
+        setPartnerId(data.partnerId);
+        break;
+      }
+
+      case 'session_ended':
+        // Server confirmed our own skip/end
+        break;
 
       case 'partner_left': {
         sounds.playDisconnectSound();
@@ -202,6 +227,10 @@ export function ChatProvider({ children }) {
         break;
     }
   };
+
+  // ── Always keep the ref pointing at the latest render's handler ──────────
+  // This must run on every render, before any WebSocket message can arrive.
+  handleSocketEventRef.current = handleSocketEvent;
 
   const sendWs = useCallback((action, payload = {}) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {

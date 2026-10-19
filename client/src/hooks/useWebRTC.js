@@ -110,6 +110,7 @@ export function useWebRTC() {
         localStreamRef.current = hybridStream;
         setLocalStream(hybridStream);
         setIsVideoOff(false);
+        setIsMirrored(false); // canvas fallback — don't mirror, text would appear backwards
         return hybridStream;
       } catch (err2) {
         console.warn('Microphone access note:', err2.name);
@@ -118,6 +119,7 @@ export function useWebRTC() {
         localStreamRef.current = simulatedStream;
         setLocalStream(simulatedStream);
         setIsVideoOff(false);
+        setIsMirrored(false); // canvas fallback — don't mirror, text would appear backwards
         return simulatedStream;
       }
     }
@@ -237,19 +239,18 @@ export function useWebRTC() {
       });
     };
 
-    if (localStreamRef.current) {
-      attachLocalTracks(localStreamRef.current);
-    } else {
-      initLocalMedia().then(stream => {
-        if (stream && isMounted && peerConnectionRef.current === pc) {
-          attachLocalTracks(stream);
-        }
-      });
-    }
+    // Ensure tracks attached before initiator creates offer
+    const startPeerSession = async () => {
+      let stream = localStreamRef.current;
+      if (!stream) {
+        stream = await initLocalMedia();
+      }
+      if (!isMounted || peerConnectionRef.current !== pc) return;
+      if (stream) {
+        attachLocalTracks(stream);
+      }
 
-    // Initiator sends offer
-    if (peerRole === 'initiator') {
-      const sendOffer = async () => {
+      if (peerRole === 'initiator') {
         try {
           const offer = await pc.createOffer({
             offerToReceiveAudio: true,
@@ -265,9 +266,9 @@ export function useWebRTC() {
         } catch (err) {
           console.error('[WebRTC] Failed to create offer:', err);
         }
-      };
-      sendOffer();
-    }
+      }
+    };
+    startPeerSession();
 
     // Signaling handlers using stable refs
     const unregisterOffer = registerSignalListenerRef.current('offer', async (data) => {
@@ -276,6 +277,14 @@ export function useWebRTC() {
       console.log('[WebRTC] Receiver handling offer');
 
       try {
+        let stream = localStreamRef.current;
+        if (!stream) {
+          stream = await initLocalMedia();
+        }
+        if (stream && activePc.signalingState !== 'closed') {
+          attachLocalTracks(stream);
+        }
+
         await activePc.setRemoteDescription(new RTCSessionDescription(data.payload.sdp));
 
         while (pendingCandidatesRef.current.length > 0) {

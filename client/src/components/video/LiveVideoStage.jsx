@@ -185,11 +185,18 @@ export function LiveVideoStage({ webrtc }) {
       <div className="call-bottom-controls-bar">
         {/* Left: Live status & End button pill */}
         <div className="live-status-pill">
-          <div className="live-dot-indicator">
-            <span className="pulsing-live-dot"></span>
-            <span className="live-text">LIVE</span>
-            <span className="live-timer">{formatLiveDuration(callDuration)}</span>
-          </div>
+          {chatStatus === 'searching' ? (
+            <div className="live-dot-indicator searching">
+              <span className="pulsing-searching-dot"></span>
+              <span className="live-text" style={{ color: '#d97706' }}>CONNECTING</span>
+            </div>
+          ) : (
+            <div className="live-dot-indicator">
+              <span className="pulsing-live-dot"></span>
+              <span className="live-text">LIVE</span>
+              <span className="live-timer">{formatLiveDuration(callDuration)}</span>
+            </div>
+          )}
           <button className="end-call-sub-btn" onClick={endCall} title="End Conversation">
             <X size={14} strokeWidth={2.5} />
             <span>End</span>

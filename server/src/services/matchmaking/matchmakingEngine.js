@@ -7,9 +7,6 @@ class MatchmakingEngine {
     // waitingPool: Array<{ userId, socketId, mode, language, interests: string[], joinedAt: number, fallbackTriggered: boolean }>
     this.waitingPool = [];
     this.lock = false;
-
-    // Periodic matcher tick to evaluate interest timeouts and fallback
-    this.tickInterval = setInterval(() => this.processPool(), 250);
   }
 
   getShardKey(mode, language = 'en') {
