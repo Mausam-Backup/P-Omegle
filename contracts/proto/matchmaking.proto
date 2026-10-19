@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package omegle.matchmaking.v1;
+option go_package = "omegle/gen/matchmaking/v1;matchmakingv1";
+
+service MatchmakingService {
+  rpc JoinQueue (JoinQueueRequest) returns (JoinQueueResponse);
+  rpc LeaveQueue (LeaveQueueRequest) returns (LeaveQueueResponse);
+  rpc CheckQueueStatus (QueueStatusRequest) returns (QueueStatusResponse);
+}
+
+enum ChatMode {
+  CHAT_MODE_UNSPECIFIED = 0;
+  CHAT_MODE_TEXT = 1;
+  CHAT_MODE_VIDEO = 2;
+}
+
+message JoinQueueRequest {
+  string user_id = 1;
+  ChatMode mode = 2;
+  repeated string interests = 3;
+  string language = 4;
+}
+
+message JoinQueueResponse {
+  bool queued = 1;
+  string estimated_wait_ms = 2;
+}
+
+message LeaveQueueRequest {
+  string user_id = 1;
+}
+
+message LeaveQueueResponse {
+  bool success = 1;
+}
+
+message QueueStatusRequest {
+  string user_id = 1;
+}
+
+message QueueStatusResponse {
+  string status = 1; // "waiting", "matched", "idle"
+  string session_id = 2;
+  repeated string common_interests = 3;
+}

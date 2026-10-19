@@ -1,0 +1,71 @@
+{
+  "version": "1.0.0",
+  "events": [
+    {
+      "name": "UserRegistered",
+      "publisher": "IdentityService",
+      "consumers": ["NotificationService", "AnalyticsService"],
+      "description": "Fired upon successful account creation with verified age >= 18."
+    },
+    {
+      "name": "UserDeleted",
+      "publisher": "IdentityService",
+      "consumers": ["SafetyService", "SessionService", "AnalyticsService"],
+      "description": "Fired when user deletes their account to purge personal data."
+    },
+    {
+      "name": "MatchCreated",
+      "publisher": "MatchmakingService",
+      "consumers": ["RealtimeGateway", "SessionService", "AnalyticsService"],
+      "description": "Fired when two waiting peers are atomically paired together."
+    },
+    {
+      "name": "SessionStarted",
+      "publisher": "SessionService",
+      "consumers": ["AnalyticsService"],
+      "description": "Fired when WebRTC signaling handshake completes and peers enter active chat."
+    },
+    {
+      "name": "SessionEnded",
+      "publisher": "SessionService",
+      "consumers": ["RealtimeGateway", "SignalingService", "SafetyService", "AbuseControlService", "AnalyticsService"],
+      "description": "Fired upon user skip, disconnect or grace timeout. Invalidates session token."
+    },
+    {
+      "name": "UserDisconnected",
+      "publisher": "RealtimeGateway",
+      "consumers": ["SessionService", "PresenceService"],
+      "description": "Fired when socket connection drops to trigger 15-second grace period."
+    },
+    {
+      "name": "UserReconnected",
+      "publisher": "RealtimeGateway",
+      "consumers": ["SessionService", "PresenceService"],
+      "description": "Fired when dropped peer reconnects before grace period expires."
+    },
+    {
+      "name": "ReportFiled",
+      "publisher": "SafetyService",
+      "consumers": ["ModerationService", "AbuseControlService"],
+      "description": "Fired when a user files a report against their partner."
+    },
+    {
+      "name": "BlockAdded",
+      "publisher": "SafetyService",
+      "consumers": ["MatchmakingService"],
+      "description": "Fired when a user blocks another user to prevent future matches."
+    },
+    {
+      "name": "UserSuspended",
+      "publisher": "ModerationService",
+      "consumers": ["IdentityService", "MatchmakingService", "NotificationService"],
+      "description": "Fired when moderator suspends an offending user."
+    },
+    {
+      "name": "UserBanned",
+      "publisher": "ModerationService",
+      "consumers": ["IdentityService", "MatchmakingService", "NotificationService"],
+      "description": "Fired when moderator permanently bans an offending user."
+    }
+  ]
+}

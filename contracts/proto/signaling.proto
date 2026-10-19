@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package omegle.signaling.v1;
+option go_package = "omegle/gen/signaling/v1;signalingv1";
+
+service SignalingService {
+  rpc RelaySignal (SignalEnvelope) returns (RelayAck);
+}
+
+enum SignalType {
+  SIGNAL_TYPE_UNSPECIFIED = 0;
+  SIGNAL_TYPE_OFFER = 1;
+  SIGNAL_TYPE_ANSWER = 2;
+  SIGNAL_TYPE_CANDIDATE = 3;
+  SIGNAL_TYPE_CHAT_MESSAGE = 4;
+  SIGNAL_TYPE_TYPING_START = 5;
+  SIGNAL_TYPE_TYPING_STOP = 6;
+}
+
+message SignalEnvelope {
+  string session_id = 1;
+  string sender_id = 2;
+  string recipient_id = 3;
+  SignalType type = 4;
+  string payload_json = 5;
+  int64 timestamp = 6;
+}
+
+message RelayAck {
+  bool delivered = 1;
+  string error_message = 2;
+}

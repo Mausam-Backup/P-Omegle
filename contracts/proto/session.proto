@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package omegle.session.v1;
+option go_package = "omegle/gen/session/v1;sessionv1";
+
+service SessionService {
+  rpc CreateSession (CreateSessionRequest) returns (CreateSessionResponse);
+  rpc EndSession (EndSessionRequest) returns (EndSessionResponse);
+  rpc SkipSession (SkipSessionRequest) returns (SkipSessionResponse);
+  rpc GetSession (GetSessionRequest) returns (GetSessionResponse);
+  rpc Heartbeat (HeartbeatRequest) returns (HeartbeatResponse);
+}
+
+enum SessionState {
+  SESSION_STATE_UNSPECIFIED = 0;
+  SESSION_STATE_CONNECTING = 1;
+  SESSION_STATE_ACTIVE = 2;
+  SESSION_STATE_GRACE = 3;
+  SESSION_STATE_ENDED = 4;
+}
+
+message CreateSessionRequest {
+  string peer_a_id = 1;
+  string peer_b_id = 2;
+  string mode = 3;
+  repeated string shared_interests = 4;
+}
+
+message CreateSessionResponse {
+  string session_id = 1;
+  SessionState state = 2;
+}
+
+message EndSessionRequest {
+  string session_id = 1;
+  string initiator_id = 2;
+  string reason = 3;
+}
+
+message EndSessionResponse {
+  bool success = 1;
+}
+
+message SkipSessionRequest {
+  string session_id = 1;
+  string user_id = 2;
+}
+
+message SkipSessionResponse {
+  bool success = 1;
+  string new_status = 2;
+}
+
+message GetSessionRequest {
+  string session_id = 1;
+}
+
+message GetSessionResponse {
+  string session_id = 1;
+  string peer_a_id = 2;
+  string peer_b_id = 3;
+  SessionState state = 4;
+  int64 started_at = 5;
+}
+
+message HeartbeatRequest {
+  string user_id = 1;
+  string session_id = 2;
+}
+
+message HeartbeatResponse {
+  bool acknowledged = 1;
+}

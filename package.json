@@ -1,0 +1,31 @@
+{
+  "name": "p-omegle",
+  "version": "1.0.0",
+  "description": "Modern Omegle-style Random Video and Text Chat Platform",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"cyan,magenta\" \"npm run dev:server\" \"npm run dev:client\"",
+    "build:client": "npm run build --prefix client",
+    "start": "npm start --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "keywords": [
+    "webrtc",
+    "video-chat",
+    "omegle-clone",
+    "microservices",
+    "realtime",
+    "matchmaking"
+  ],
+  "author": "P-Omegle Team",
+  "license": "MIT"
+}
