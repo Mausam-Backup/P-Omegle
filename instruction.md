@@ -1,55 +1,67 @@
-# Running the Client and Server
+# 🚀 Running the Client and Server
 
-The project has a React/Vite client and a Node.js backend. You can start both
-at once from the project root, or run them in separate terminals.
+The project has a **React/Vite** client and a **Node.js** backend. You can start both at once from the project root, or run them in separate terminals.
 
-## Requirements
+---
 
-- Node.js and npm installed
-- A terminal opened in the project root
+## 📋 Requirements
 
-## Start both servers together
+| Requirement | Details |
+|---|---|
+| **Runtime** | Node.js `v20 LTS` or `v24+` |
+| **Package Manager** | npm `v10+` (bundled with Node.js) |
+| **Working Directory** | Terminal opened at the **project root** (`P-Omegle/`) |
 
-From the project root, install dependencies (first time only) and start the
-development servers:
+---
+
+## ⚡ Start Both Servers Together
+
+From the project root, install dependencies (first time only) and start the development servers:
 
 ```bash
 npm install
 npm run dev
 ```
 
-The root `dev` script starts the backend and frontend concurrently. Open
-**http://localhost:5173** in your browser. The backend runs at
-**http://localhost:5000**.
+| Service | URL |
+|---|---|
+| 🌐 **Frontend** | http://localhost:5173 |
+| ⚙️ **Backend REST** | http://localhost:5000 |
+| 🔌 **WebSocket** | ws://localhost:5000/ws |
+| 🩺 **Health Check** | http://localhost:5000/health |
 
-## Start them in separate terminals
+> The root `dev` script uses **concurrently** to start the backend and frontend in a single terminal with colour-coded output.
 
-Open two terminals, and run both commands from the project root.
+---
 
-Terminal 1 — backend:
+## 🖥️ Start Them in Separate Terminals
 
-```bash
-npm run dev:server
-```
+Open two terminals, both from the **project root**.
 
-Terminal 2 — frontend:
+| Terminal | Role | Command |
+|---|---|---|
+| **Terminal 1** | ⚙️ Backend | `npm run dev:server` |
+| **Terminal 2** | 🌐 Frontend | `npm run dev:client` |
 
-```bash
-npm run dev:client
-```
+Then open **http://localhost:5173** in your browser.
 
-Then open **http://localhost:5173**. The backend health endpoint is
-**http://localhost:5000/health**.
+---
 
-## Stop the servers
+## 🛑 Stop the Servers
 
-Press **Ctrl+C** in the terminal running the servers.
+| Method | Action |
+|---|---|
+| **Concurrent mode** | Press `Ctrl + C` in the single terminal |
+| **Separate terminals** | Press `Ctrl + C` in each terminal individually |
 
-## Troubleshooting
+---
 
-- If a command reports that a package is missing, run `npm install` from the
-  project root, then try again.
-- If port `5000` or `5173` is already in use, stop the other process using that
-  port before starting the development servers.
-- The frontend uses `http://localhost:5000` for API requests and
-  `ws://localhost:5000/ws` for WebSocket connections by default.
+## 🔧 Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| `Cannot find module` / missing package | Run `npm install` from the project root, then retry |
+| Port `5000` already in use | Stop the other process occupying port `5000` before starting |
+| Port `5173` already in use | Stop the other process occupying port `5173` before starting |
+| Frontend can't reach the backend | Confirm `VITE_SERVER_URL=http://localhost:5000` in `client/.env` |
+| WebSocket connection refused | Confirm `VITE_WS_URL=ws://localhost:5000/ws` in `client/.env` |

@@ -65,43 +65,61 @@
 ## ✨ Features
 
 ### 🎥 Core Chat
-- **Random Video Chat** — Instant P2P video via WebRTC with camera/mic controls
-- **Random Text Chat (Convoo mode)** — Text-only chat with a styled chat interface
-- **Interest-Based Matching** — Tag your interests; get matched with like-minded strangers
-- **Language Preference** — Filter matches by preferred language
-- **Skip & Next** — Instantly skip to the next stranger with optional auto-requeue
+
+| Feature | Description |
+|---|---|
+| **Random Video Chat** | Instant P2P video via WebRTC with camera/mic controls |
+| **Random Text Chat (Convoo mode)** | Text-only chat with a fully styled chat interface |
+| **Interest-Based Matching** | Tag your interests; get matched with like-minded strangers |
+| **Language Preference** | Filter matches by your preferred language |
+| **Skip & Next** | Instantly skip to the next stranger with optional auto-requeue |
 
 ### 🔌 Real-Time Infrastructure
-- **WebSocket Gateway** — Persistent, low-latency bidirectional messaging (`/ws`)
-- **WebRTC Signaling Relay** — Offer/Answer/ICE candidate forwarding between peers
-- **In-Call Chat Drawer** — Live text messages during a video session without interruption
-- **Typing Indicators** — Real-time `typing_start` / `typing_stop` events
-- **Heartbeat & Presence** — Periodic health checks and online presence tracking
+
+| Feature | Description |
+|---|---|
+| **WebSocket Gateway** | Persistent, low-latency bidirectional messaging over `/ws` |
+| **WebRTC Signaling Relay** | Offer / Answer / ICE candidate forwarding between peers |
+| **In-Call Chat Drawer** | Live text messages during a video session without interruption |
+| **Typing Indicators** | Real-time `typing_start` / `typing_stop` events to both peers |
+| **Heartbeat & Presence** | Periodic health checks and online presence tracking |
 
 ### 🛡️ Safety & Moderation
-- **Report System** — Users can report partners with reason categorization
-- **Block List** — Prevents blocked users from ever being re-matched
-- **Moderator Dashboard** — Dedicated UI for reviewing reports, suspending/banning users
-- **Rate Limiter** — Per-IP request throttling on all REST and WebSocket endpoints
-- **Age Verification** — Registration enforces age ≥ 18
+
+| Feature | Description |
+|---|---|
+| **Report System** | Users can report partners with reason categorization |
+| **Block List** | Prevents blocked users from ever being re-matched |
+| **Moderator Dashboard** | Dedicated UI for reviewing reports, suspending/banning users |
+| **Rate Limiter** | Per-IP request throttling on all REST and WebSocket endpoints |
+| **Age Verification** | Registration enforces age ≥ 18 |
 
 ### 🔐 Identity & Auth
-- **Optional Authentication** — JWT access tokens (24h) with refresh tokens (7d)
-- **Anonymous Guest Mode** — Participate without an account; guest IDs auto-generated
-- **Secure Password Hashing** — `bcryptjs` for credential storage
-- **Token-Gated WebSocket** — Authenticated sessions carry richer profile data
+
+| Feature | Description |
+|---|---|
+| **Optional Authentication** | JWT access tokens (24 h) with refresh tokens (7 d) |
+| **Anonymous Guest Mode** | Participate without an account — guest IDs auto-generated |
+| **Secure Password Hashing** | `bcryptjs` used for all credential storage |
+| **Token-Gated WebSocket** | Authenticated sessions carry richer profile data |
 
 ### ♻️ Resilience
-- **Reconnection Grace Period** — 15-second window to restore a dropped session
-- **Graceful Shutdown** — SIGTERM/SIGINT handling with connection draining
-- **In-Memory Fallback** — Operates without Redis/PostgreSQL for local dev
+
+| Feature | Description |
+|---|---|
+| **Reconnection Grace Period** | 15-second window to restore a dropped session transparently |
+| **Graceful Shutdown** | SIGTERM / SIGINT handling with full connection draining |
+| **In-Memory Fallback** | Operates without Redis / PostgreSQL for frictionless local dev |
 
 ### 🎨 Frontend Experience
-- **Lobby & Video Stage** — Distinct views for waiting and active call states
-- **Device Settings Modal** — Switch camera/microphone mid-session
-- **Doodle Pad** — Collaborative drawing canvas during chat
-- **Sound Effects** — Subtle audio feedback for match/connect events
-- **Fully Responsive** — Mobile-first CSS design
+
+| Feature | Description |
+|---|---|
+| **Lobby & Video Stage** | Distinct views for waiting queue and active call states |
+| **Device Settings Modal** | Switch camera / microphone at any point mid-session |
+| **Doodle Pad** | Collaborative drawing canvas available during a chat session |
+| **Sound Effects** | Subtle audio feedback for match, connect, and disconnect events |
+| **Fully Responsive** | Mobile-first CSS design that adapts to any screen size |
 
 ---
 
@@ -564,42 +582,17 @@ The project ships with a complete `docker-compose.yml` that spins up all four se
 | `redis` | `redis:7-alpine` | `6379` | Matchmaking queue store |
 | `postgres` | `postgres:16-alpine` | `5432` | Identity & safety DB |
 
-### Build & Start All Services
+### 🔨 Common Docker Commands
 
-```bash
-docker-compose up --build
-```
-
-### Start in Detached Mode
-
-```bash
-docker-compose up -d --build
-```
-
-### View Logs
-
-```bash
-# All services
-docker-compose logs -f
-
-# Backend only
-docker-compose logs -f server
-
-# Frontend only
-docker-compose logs -f client
-```
-
-### Stop All Services
-
-```bash
-docker-compose down
-```
-
-### Stop & Remove Volumes — destroys persistent data
-
-```bash
-docker-compose down -v
-```
+| Action | Command |
+|---|---|
+| 🏗️ **Build & start all** | `docker-compose up --build` |
+| 🚀 **Start in background** | `docker-compose up -d --build` |
+| 📋 **Tail all logs** | `docker-compose logs -f` |
+| ⚙️ **Tail server logs** | `docker-compose logs -f server` |
+| 🌐 **Tail client logs** | `docker-compose logs -f client` |
+| 🛑 **Stop all services** | `docker-compose down` |
+| 🗑️ **Stop & remove volumes** | `docker-compose down -v` |
 
 ---
 
@@ -757,32 +750,18 @@ curl http://localhost:5000/health
 
 Contributions are warmly welcome! Whether it's bug fixes, new features, documentation improvements, or UI polish — all PRs are appreciated.
 
-### Getting Started with Contributing
+### 🪜 Contribution Steps
 
-1. **Fork** the repository on GitHub
-2. **Clone** your fork locally:
-   ```bash
-   git clone https://github.com/<your-username>/P-Omegle.git
-   cd P-Omegle
-   ```
-3. **Create a feature branch** from `main`:
-   ```bash
-   git checkout -b feat/your-feature-name
-   ```
-4. **Install dependencies**:
-   ```bash
-   npm run install:all
-   ```
-5. **Make your changes** following the code style guidelines below
-6. **Test** your changes thoroughly
-7. **Commit** using conventional commit format:
-   ```bash
-   git commit -m "feat(matchmaking): add language preference weighting"
-   ```
-8. **Push** your branch and open a **Pull Request**:
-   ```bash
-   git push origin feat/your-feature-name
-   ```
+| Step | Action | Command / Notes |
+|---|---|---|
+| 1️⃣ | **Fork** the repository | Click **Fork** on GitHub |
+| 2️⃣ | **Clone** your fork | `git clone https://github.com/<you>/P-Omegle.git` |
+| 3️⃣ | **Create a feature branch** | `git checkout -b feat/your-feature-name` |
+| 4️⃣ | **Install dependencies** | `npm run install:all` |
+| 5️⃣ | **Make your changes** | Follow the code style guidelines below |
+| 6️⃣ | **Test** thoroughly | Run E2E test & lint before committing |
+| 7️⃣ | **Commit** | `git commit -m "feat(scope): description"` |
+| 8️⃣ | **Push & open PR** | `git push origin feat/your-feature-name` |
 
 ---
 
@@ -803,37 +782,43 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) speci
 
 ---
 
-### Code Style Guidelines
+### 🎨 Code Style Guidelines
 
-- **JavaScript**: ES Modules (`import`/`export`) throughout — no CommonJS
-- **Frontend**: Functional components only; hooks for all stateful logic
-- **Linting**: Run `npm run lint --prefix client` before pushing — no OxLint errors allowed
-- **Naming**: camelCase for variables/functions, PascalCase for components/classes
-- **Services**: Keep each service focused on a single domain (e.g., no auth logic in matchmaking)
-- **Env Variables**: Never hard-code secrets — use `config/env.js` on the server
-- **Comments**: Prefer self-documenting code — add JSDoc for public service APIs
-
----
-
-### Reporting Bugs
-
-Please open a [GitHub Issue](https://github.com/Mausam5055/P-Omegle/issues) with:
-
-- A clear, descriptive title
-- Steps to reproduce the bug
-- Expected vs. actual behavior
-- Your environment (OS, Node.js version, browser)
-- Relevant logs or screenshots
+| Area | Rule |
+|---|---|
+| **Module System** | ES Modules (`import` / `export`) only — no CommonJS |
+| **Frontend Components** | Functional components only; hooks for all stateful logic |
+| **Linting** | Run `npm run lint --prefix client` — zero OxLint errors before pushing |
+| **Naming Convention** | `camelCase` for variables/functions · `PascalCase` for components/classes |
+| **Service Boundaries** | Each service owns one domain — no cross-domain logic (e.g. no auth in matchmaking) |
+| **Secrets** | Never hard-code — always use `config/env.js` on the server |
+| **Documentation** | Prefer self-documenting code · add JSDoc for all public service APIs |
 
 ---
 
-### Suggesting Features
+### 🐛 Reporting Bugs
 
-Open a [GitHub Discussion](https://github.com/Mausam5055/P-Omegle/discussions) or Issue labeled `enhancement` with:
+Please open a [GitHub Issue](https://github.com/Mausam5055/P-Omegle/issues) and include:
 
-- A description of the problem the feature solves
-- Your proposed solution
-- Any alternatives you considered
+| Field | What to Provide |
+|---|---|
+| **Title** | Clear, descriptive one-liner |
+| **Steps to Reproduce** | Numbered step-by-step instructions |
+| **Expected vs. Actual** | What you expected to happen vs. what did happen |
+| **Environment** | OS, Node.js version, browser & version |
+| **Evidence** | Relevant logs, error messages, or screenshots |
+
+---
+
+### 💡 Suggesting Features
+
+Open a [GitHub Discussion](https://github.com/Mausam5055/P-Omegle/discussions) or an Issue labeled `enhancement` and include:
+
+| Field | What to Provide |
+|---|---|
+| **Problem** | Description of the problem the feature solves |
+| **Proposed Solution** | Your suggested implementation approach |
+| **Alternatives** | Any alternative solutions you considered |
 
 ---
 
@@ -861,22 +846,27 @@ Open a [GitHub Discussion](https://github.com/Mausam5055/P-Omegle/discussions) o
 
 ## 🔒 Security
 
-We take security seriously. If you discover a vulnerability, please **do not open a public issue**. Instead:
+We take security seriously. If you discover a vulnerability, please **do not open a public issue**.
 
-1. Email the maintainers (see `package.json` author field)
-2. Or open a [GitHub Security Advisory](https://github.com/Mausam5055/P-Omegle/security/advisories/new)
+### 📬 Responsible Disclosure
 
-We commit to acknowledging reports within 48 hours and patching critical issues within 7 days.
+| Channel | Details |
+|---|---|
+| ✉️ **Email** | Contact the maintainers (see `package.json` author field) |
+| 🔐 **GitHub Advisory** | [Open a Security Advisory](https://github.com/Mausam5055/P-Omegle/security/advisories/new) |
+| ⏱️ **Response SLA** | Acknowledgement within **48 hours** · critical patches within **7 days** |
 
-### Security Checklist for Production Deployment
+### ✅ Production Security Checklist
 
-- [ ] Set strong, random values for `JWT_SECRET` and `REFRESH_TOKEN_SECRET`
-- [ ] Restrict `ALLOWED_ORIGINS` to your actual domain(s)
-- [ ] Configure a production TURN server (`TURN_SERVER_URL`, credentials)
-- [ ] Enable HTTPS / WSS via a reverse proxy (Nginx, Caddy, Cloudflare)
-- [ ] Set `NODE_ENV=production`
-- [ ] Enable Redis persistence and PostgreSQL backups
-- [ ] Review and tighten the rate limiter thresholds
+| # | Action | Variable / Tool |
+|---|---|---|
+| 1 | Set strong random JWT secrets | `JWT_SECRET` · `REFRESH_TOKEN_SECRET` |
+| 2 | Restrict allowed origins | `ALLOWED_ORIGINS` |
+| 3 | Configure a production TURN server | `TURN_SERVER_URL` · credentials |
+| 4 | Enforce HTTPS / WSS | Nginx · Caddy · Cloudflare Tunnel |
+| 5 | Set production runtime flag | `NODE_ENV=production` |
+| 6 | Enable data persistence & backups | Redis AOF · PostgreSQL pg_dump |
+| 7 | Tighten rate limiter | `RATE_LIMIT_MAX_REQUESTS` · `RATE_LIMIT_WINDOW_MS` |
 
 ---
 
@@ -910,11 +900,13 @@ SOFTWARE.
 
 ## 🙏 Acknowledgements
 
-- [WebRTC.org](https://webrtc.org/) — The open standard powering all P2P communication
-- [ws](https://github.com/websockets/ws) — The blazing-fast WebSocket library for Node.js
-- [Lucide](https://lucide.dev/) — Beautiful, consistent open-source icons
-- [Vite](https://vitejs.dev/) — Next-generation frontend tooling
-- [OxLint](https://oxc.rs/) — The fastest JavaScript linter written in Rust
+| Project | Role in P-Omegle |
+|---|---|
+| [WebRTC.org](https://webrtc.org/) | The open standard powering all P2P media communication |
+| [ws](https://github.com/websockets/ws) | Blazing-fast WebSocket server for Node.js signaling |
+| [Lucide React](https://lucide.dev/) | Beautiful, consistent open-source icon library |
+| [Vite](https://vitejs.dev/) | Next-generation build tooling and dev server |
+| [OxLint](https://oxc.rs/) | The fastest JavaScript linter, written in Rust |
 
 ---
 
