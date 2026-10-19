@@ -232,7 +232,7 @@ export function DoodleSearching({ className = '', style = {} }) {
 }
 
 // 4. Compact B&W Avatar Heads for pill badges & profile selection
-export function DoodleAvatarHead({ seed = 'stranger', size = 26 }) {
+export function DoodleAvatarHead({ seed = 'stranger', size = 26, className = '', style = {} }) {
   const isSelf = seed === 'you' || seed === 'self';
   
   return (
@@ -240,7 +240,19 @@ export function DoodleAvatarHead({ seed = 'stranger', size = 26 }) {
       viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ width: size, height: size, borderRadius: '50%', background: '#ffffff', border: '1.5px solid #0f172a' }}
+      className={className}
+      style={{
+        width: size,
+        height: size,
+        maxWidth: '100%',
+        maxHeight: '100%',
+        borderRadius: '50%',
+        background: '#ffffff',
+        border: '1.5px solid #0f172a',
+        flexShrink: 0,
+        boxSizing: 'border-box',
+        ...style
+      }}
     >
       {/* Head */}
       <circle cx="50" cy="50" r="48" fill="#ffffff" />

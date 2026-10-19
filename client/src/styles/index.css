@@ -1549,27 +1549,38 @@ html, body {
 
 .avatar-selection-group {
   margin-bottom: 1.25rem;
+  width: 100%;
 }
 
 .avatar-options-row {
   display: flex;
-  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
   margin-top: 0.5rem;
+  width: 100%;
 }
 
 .avatar-option-item {
-  width: 52px;
-  height: 52px;
+  width: 50px;
+  height: 50px;
+  max-width: 52px;
+  max-height: 52px;
+  aspect-ratio: 1;
+  flex: 0 1 50px;
   border-radius: 50%;
   border: 2px solid transparent;
   position: relative;
   cursor: pointer;
-  transition: transform 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
 .avatar-option-item.selected {
   border-color: var(--primary-indigo);
-  transform: scale(1.08);
+  transform: scale(1.06);
 }
 
 .avatar-preview-img {
@@ -1591,6 +1602,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
 }
 
 .form-field-group {
@@ -1625,17 +1637,24 @@ html, body {
   background: #faf5ff;
   border: 1px solid #f3e8ff;
   border-radius: 14px;
-  padding: 1rem;
+  padding: 0.85rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.75rem;
   margin-bottom: 1.5rem;
 }
 
 .pro-status-left {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.65rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.pro-status-left > div {
+  min-width: 0;
 }
 
 .pro-status-title {
@@ -1647,6 +1666,7 @@ html, body {
 .pro-status-sub {
   font-size: 0.78rem;
   color: #7e22ce;
+  line-height: 1.25;
 }
 
 .pro-toggle-btn {
@@ -1654,10 +1674,12 @@ html, body {
   color: #ffffff;
   border: none;
   border-radius: 20px;
-  padding: 0.4rem 0.95rem;
+  padding: 0.45rem 1rem;
   font-size: 0.825rem;
   font-weight: 600;
   cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .modal-actions-row {
@@ -2047,3 +2069,108 @@ html, body {
     padding: 0.2rem 0.35rem;
   }
 }
+
+/* Responsive Mobile Modals */
+@media (max-width: 520px) {
+  .modal-backdrop {
+    padding: 0.75rem;
+  }
+
+  .modal-card {
+    padding: 1.25rem 1rem;
+    border-radius: 20px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .modal-header {
+    margin-bottom: 1rem;
+  }
+
+  .modal-heading {
+    font-size: 1.15rem;
+  }
+
+  .avatar-options-row {
+    gap: 0.35rem;
+    justify-content: space-between;
+  }
+
+  .avatar-option-item {
+    width: 44px;
+    height: 44px;
+    max-width: 44px;
+    flex: 0 1 44px;
+  }
+
+  .pro-status-card {
+    padding: 0.75rem 0.85rem;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .pro-status-title {
+    font-size: 0.85rem;
+  }
+
+  .pro-status-sub {
+    font-size: 0.72rem;
+  }
+
+  .pro-toggle-btn {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.78rem;
+  }
+
+  .modal-actions-row {
+    gap: 0.6rem;
+  }
+
+  .secondary-btn {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.825rem;
+  }
+
+  .primary-submit-btn {
+    padding: 0.6rem 1.1rem;
+    font-size: 0.85rem;
+    flex: 1;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .modal-card {
+    padding: 1rem 0.85rem;
+  }
+
+  .avatar-option-item {
+    width: 38px;
+    height: 38px;
+    max-width: 38px;
+    flex: 0 1 38px;
+  }
+
+  .avatar-check-badge {
+    width: 15px;
+    height: 15px;
+  }
+
+  .avatar-check-badge svg {
+    width: 9px;
+    height: 9px;
+  }
+
+  .pro-status-card {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+    gap: 0.6rem;
+  }
+
+  .pro-toggle-btn {
+    align-self: flex-start;
+    padding: 0.35rem 0.85rem;
+  }
+}
+

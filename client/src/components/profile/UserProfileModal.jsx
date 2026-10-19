@@ -47,7 +47,7 @@ export function UserProfileModal() {
                   className={`avatar-option-item ${selectedAvatar === preset ? 'selected' : ''}`}
                   onClick={() => setSelectedAvatar(preset)}
                 >
-                  <DoodleAvatarHead seed={preset} size={48} />
+                  <DoodleAvatarHead seed={preset} size="100%" />
                   {selectedAvatar === preset && (
                     <div className="avatar-check-badge">
                       <Check size={12} strokeWidth={3} />
