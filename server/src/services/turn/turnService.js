@@ -45,19 +45,32 @@ class TurnService {
             });
             if (resPost.ok) {
               const data = await resPost.json();
-              if (Array.isArray(data)) {
-                meteredServers = data;
-              } else if (data && (data.urls || data.username)) {
+              // If data contains an apiKey, fetch the official ICE servers array
+              if (data && data.apiKey) {
+                try {
+                  const resServers = await fetch(`https://${cleanDomain}.metered.live/api/v1/turn/credentials?apiKey=${data.apiKey}`);
+                  if (resServers.ok) {
+                    const serversJson = await resServers.json();
+                    if (Array.isArray(serversJson) && serversJson.length > 0) {
+                      meteredServers = serversJson;
+                    }
+                  }
+                } catch {}
+              }
+
+              // Fallback: construct using Metered's global edge relay domain directly
+              if (!meteredServers && data && data.username && (data.password || data.credential)) {
                 meteredServers = [
+                  { urls: 'stun:stun.relay.metered.ca:80' },
                   {
-                    urls: Array.isArray(data.urls) ? data.urls : [
-                      `turn:${cleanDomain}.metered.live:80`,
-                      `turn:${cleanDomain}.metered.live:443`,
-                      `turn:${cleanDomain}.metered.live:443?transport=tcp`,
-                      `turns:${cleanDomain}.metered.live:443?transport=tcp`
+                    urls: [
+                      'turn:global.relay.metered.ca:80',
+                      'turn:global.relay.metered.ca:80?transport=tcp',
+                      'turn:global.relay.metered.ca:443',
+                      'turns:global.relay.metered.ca:443?transport=tcp'
                     ],
                     username: data.username,
-                    credential: data.credential || data.password
+                    credential: data.password || data.credential
                   }
                 ];
               }
