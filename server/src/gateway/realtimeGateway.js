@@ -5,6 +5,7 @@ import { matchmakingEngine } from '../services/matchmaking/matchmakingEngine.js'
 import { sessionManager } from '../services/session/sessionManager.js';
 import { signalingRelay } from '../services/signaling/signalingRelay.js';
 import { presenceTracker } from '../services/presence/presenceTracker.js';
+import { turnService } from '../services/turn/turnService.js';
 import { log } from '../utils/logger.js';
 
 class RealtimeGateway {
@@ -252,7 +253,7 @@ class RealtimeGateway {
     }
   }
 
-  broadcastMatches() {
+  async broadcastMatches() {
     const matches = matchmakingEngine.processPool();
     if (!matches || matches.length === 0) return;
 
@@ -273,13 +274,23 @@ class RealtimeGateway {
       const clientA = this.clients.get(peerA.userId);
       const clientB = this.clients.get(peerB.userId);
 
+      // Fetch active ICE & TURN relay servers
+      let iceServers = [];
+      try {
+        const creds = await turnService.getIceCredentials(peerA.userId, sessionId);
+        iceServers = creds?.iceServers || [];
+      } catch (err) {
+        console.warn('[RealtimeGateway] Could not fetch iceCredentials for match:', err.message);
+      }
+
       if (clientA && clientA.socket.readyState === WebSocket.OPEN) {
         this.send(clientA.socket, 'matched', {
           sessionId,
           role: 'initiator',
           mode,
           sharedInterests,
-          partnerId: peerB.userId
+          partnerId: peerB.userId,
+          iceServers
         });
       }
 
@@ -289,7 +300,8 @@ class RealtimeGateway {
           role: 'receiver',
           mode,
           sharedInterests,
-          partnerId: peerA.userId
+          partnerId: peerA.userId,
+          iceServers
         });
       }
     }

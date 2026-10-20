@@ -19,6 +19,7 @@ export function ChatProvider({ children }) {
   const [peerRole, setPeerRole] = useState(null);
   const [sharedInterests, setSharedInterests] = useState([]);
   const [partnerId, setPartnerId] = useState(null);
+  const [iceServers, setIceServers] = useState(null);
 
   // Partner display details (Anonymous Stranger)
   const [partner, setPartner] = useState({
@@ -126,7 +127,9 @@ export function ChatProvider({ children }) {
     try {
       const token = sessionStorage.getItem('omegle_guest_token') || localStorage.getItem('omegle_access_token');
       const defaultWsUrl = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
-        ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`
+        ? (window.location.hostname.includes('vercel.app')
+            ? 'wss://omegle-backend-r1e4.onrender.com/ws'
+            : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`)
         : 'ws://localhost:5000/ws';
       const wsUrl = `${import.meta.env.VITE_WS_URL || defaultWsUrl}${token ? `?token=${token}` : ''}`;
 
@@ -217,6 +220,9 @@ export function ChatProvider({ children }) {
         setPeerRole(data.role);
         setSharedInterests(data.sharedInterests || []);
         setPartnerId(data.partnerId);
+        if (data.iceServers && Array.isArray(data.iceServers) && data.iceServers.length > 0) {
+          setIceServers(data.iceServers);
+        }
 
         setPartner({
           name: 'Stranger',
@@ -507,7 +513,8 @@ export function ChatProvider({ children }) {
         sendMessage,
         sendTypingStatus,
         sendWs,
-        registerSignalListener
+        registerSignalListener,
+        iceServers
       }}
     >
       {children}

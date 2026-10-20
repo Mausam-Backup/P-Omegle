@@ -114,7 +114,7 @@ function createSilentAudioTrack() {
 }
 
 export function useWebRTC() {
-  const { sessionId, peerRole, chatStatus, sendWs, registerSignalListener } = useChat();
+  const { sessionId, peerRole, chatStatus, sendWs, registerSignalListener, iceServers } = useChat();
 
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
@@ -268,8 +268,12 @@ export function useWebRTC() {
       { urls: 'stun:global.stun.twilio.com:3478' }
     ];
 
+    const activeIceServers = (iceServers && Array.isArray(iceServers) && iceServers.length > 0)
+      ? iceServers
+      : (cachedIceServers || defaultServers);
+
     const pc = new RTCPeerConnection({
-      iceServers: cachedIceServers || defaultServers,
+      iceServers: activeIceServers,
       iceCandidatePoolSize: 2
     });
     peerConnectionRef.current = pc;
@@ -530,7 +534,7 @@ export function useWebRTC() {
       }
       pendingCandidatesRef.current = [];
     };
-  }, [chatStatus, sessionId, peerRole]);
+  }, [chatStatus, sessionId, peerRole, iceServers]);
 
   const toggleMute = () => {
     if (localStreamRef.current) {
