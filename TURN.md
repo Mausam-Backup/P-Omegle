@@ -110,37 +110,37 @@ Metered.ca provides **50 GB/month of free TURN relay data**.
    - **Username**: `[generated username]`
    - **Password / Secret**: `[generated password]`
    - **TURN Server URLs**:
-     - `turn:pomegele.metered.live:80`
-     - `turn:pomegele.metered.live:443`
-     - `turn:pomegele.metered.live:443?transport=tcp`
-     - `turns:pomegele.metered.live:443?transport=tcp`
+     - `turn:<your-subdomain>.metered.live:80`
+     - `turn:<your-subdomain>.metered.live:443`
+     - `turn:<your-subdomain>.metered.live:443?transport=tcp`
+     - `turns:<your-subdomain>.metered.live:443?transport=tcp`
 
 ---
 
 ## 6. Where to Put the Keys
 
-### In Local `.env` and `server/.env`:
+### In Local `.env` and `server/.env` (Ignored by Git):
 ```env
 # Google & Mozilla STUN (NAT discovery)
 STUN_SERVERS=stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302,stun:stun.services.mozilla.com
 
 # Metered Cloud TURN Relay (traverses Symmetric NAT / CGNAT / 4G / 5G)
-TURN_SERVER_URL=turn:pomegele.metered.live:80,turn:pomegele.metered.live:443,turn:pomegele.metered.live:443?transport=tcp,turns:pomegele.metered.live:443?transport=tcp
+TURN_SERVER_URL=turn:<your-subdomain>.metered.live:80,turn:<your-subdomain>.metered.live:443,turn:<your-subdomain>.metered.live:443?transport=tcp,turns:<your-subdomain>.metered.live:443?transport=tcp
 TURN_SERVER_USERNAME=<paste-username-from-metered-credentials-tab>
 TURN_SERVER_CREDENTIAL=<paste-password-from-metered-credentials-tab>
 
-# Metered Workspace Reference (for your records)
-METERED_DOMAIN=pomegele
-METERED_API_KEY=rKLlNCvYGEgD9SV_w27PS6xeIZyhlC8qI6-oJzII42bEOZUn
+# Metered Workspace API Keys (Automated Live Credentials)
+METERED_DOMAIN=<your-subdomain>
+METERED_API_KEY=<your-secret-api-key>
 ```
 
 ### In Render Dashboard (`omegle-backend-r1e4`):
 1. Open [dashboard.render.com](https://dashboard.render.com).
 2. Click `omegle-backend-r1e4` &rarr; **Environment**.
 3. Add these variables:
-   - `TURN_SERVER_URL` = `turn:pomegele.metered.live:80,turn:pomegele.metered.live:443,turn:pomegele.metered.live:443?transport=tcp,turns:pomegele.metered.live:443?transport=tcp`
-   - `TURN_SERVER_USERNAME` = `[username from Metered Credentials tab]`
-   - `TURN_SERVER_CREDENTIAL` = `[password from Metered Credentials tab]`
+   - `METERED_DOMAIN` = `<your-subdomain>`
+   - `METERED_API_KEY` = `<your-secret-api-key>`
+   *(Or alternatively, add `TURN_SERVER_URL`, `TURN_SERVER_USERNAME`, `TURN_SERVER_CREDENTIAL`)*.
 4. Click **Save Changes**.
 
 ---
