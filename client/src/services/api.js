@@ -1,4 +1,8 @@
-const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_SERVER_URL || (
+  typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+    ? window.location.origin
+    : 'http://localhost:5000'
+);
 
 function getHeaders() {
   const token = sessionStorage.getItem('omegle_guest_token') || localStorage.getItem('omegle_access_token');

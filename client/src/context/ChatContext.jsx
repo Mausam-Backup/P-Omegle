@@ -115,7 +115,10 @@ export function ChatProvider({ children }) {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) return;
 
     const token = sessionStorage.getItem('omegle_guest_token') || localStorage.getItem('omegle_access_token');
-    const wsUrl = `${import.meta.env.VITE_WS_URL || 'ws://localhost:5000/ws'}${token ? `?token=${token}` : ''}`;
+    const defaultWsUrl = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+      ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`
+      : 'ws://localhost:5000/ws';
+    const wsUrl = `${import.meta.env.VITE_WS_URL || defaultWsUrl}${token ? `?token=${token}` : ''}`;
 
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
