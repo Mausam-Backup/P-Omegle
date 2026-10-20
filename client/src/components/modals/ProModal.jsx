@@ -1,64 +1,59 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { X, Check, Zap, Globe, Shield, Video } from 'lucide-react';
-import { DoodleProBadgeIcon } from '../doodles/DoodleCharacter';
+import { X, Sparkles, Zap, Video, Globe } from 'lucide-react';
 
 export function ProModal() {
-  const { user, isProModalOpen, setIsProModalOpen, togglePro } = useAuth();
+  const { isProModalOpen, setIsProModalOpen } = useAuth();
 
   if (!isProModalOpen) return null;
 
   return (
     <div className="modal-backdrop" onClick={() => setIsProModalOpen(false)}>
-      <div className="modal-card pro-modal-card" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close-icon-btn" onClick={() => setIsProModalOpen(false)}>
-          <X size={18} />
+      <div className="pro-modal-card-clean" onClick={(e) => e.stopPropagation()}>
+        <button
+          className="pro-modal-close-btn"
+          onClick={() => setIsProModalOpen(false)}
+          aria-label="Close modal"
+        >
+          <X size={16} />
         </button>
 
-        <div className="pro-modal-header">
-          <div className="pro-badge-icon">
-            <DoodleProBadgeIcon size={58} />
-          </div>
-          <h2 className="pro-modal-title">Upgrade to Pro</h2>
-          <p className="pro-modal-subtitle">
-            Supercharge your video conversations with zero wait time, 1080p crystal clear streams, and country filters.
-          </p>
+        {/* Top Icon Badge */}
+        <div className="pro-clean-icon-wrap">
+          <Sparkles size={26} className="pro-clean-sparkle" />
         </div>
 
-        <div className="pro-features-list">
-          <div className="pro-feature-item">
-            <div className="feature-icon-box"><Zap size={18} color="#0f172a" /></div>
-            <div>
-              <div className="feature-title">Instant Matching</div>
-              <div className="feature-desc">Skip queues with priority routing directly to waiting partners.</div>
-            </div>
-          </div>
+        {/* Title & Coming Soon Pill */}
+        <h2 className="pro-clean-title">Pro Plan</h2>
+        <div className="pro-clean-badge">Coming Soon</div>
 
-          <div className="pro-feature-item">
-            <div className="feature-icon-box"><Video size={18} color="#0f172a" /></div>
-            <div>
-              <div className="feature-title">1080p Ultra HD Video</div>
-              <div className="feature-desc">Uncapped high-bitrate WebRTC video and spatial audio.</div>
-            </div>
-          </div>
+        <p className="pro-clean-desc">
+          Premium matchmaking features and Ultra HD video will be available soon.
+        </p>
 
-          <div className="pro-feature-item">
-            <div className="feature-icon-box"><Globe size={18} color="#0f172a" /></div>
-            <div>
-              <div className="feature-title">Country & Region Filter</div>
-              <div className="feature-desc">Choose specific countries or global matching anytime.</div>
-            </div>
+        {/* Minimalist Feature Chips */}
+        <div className="pro-clean-chips-grid">
+          <div className="pro-clean-chip">
+            <Zap size={15} color="#4f46e5" />
+            <span>Instant Priority Matching</span>
+          </div>
+          <div className="pro-clean-chip">
+            <Video size={15} color="#4f46e5" />
+            <span>1080p Ultra HD Video</span>
+          </div>
+          <div className="pro-clean-chip">
+            <Globe size={15} color="#4f46e5" />
+            <span>Country & Region Filters</span>
           </div>
         </div>
 
+        {/* Clean Close Action */}
         <button
-          className="pro-activate-btn"
-          onClick={() => {
-            togglePro();
-            setIsProModalOpen(false);
-          }}
+          type="button"
+          className="pro-clean-done-btn"
+          onClick={() => setIsProModalOpen(false)}
         >
-          {user?.isPro ? 'Deactivate Pro' : 'Activate Pro Membership'}
+          Got it
         </button>
       </div>
     </div>

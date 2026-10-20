@@ -27,6 +27,11 @@ class RealtimeGateway {
       this.broadcastMatches();
     }, 200);
 
+    // Broadcast live presence count to all clients periodically
+    setInterval(() => {
+      this.broadcastPresence();
+    }, 3000);
+
     // Keep-alive ping frames every 25 seconds to prevent Render / Cloudflare proxy drop
     setInterval(() => {
       for (const client of this.clients.values()) {
@@ -39,6 +44,23 @@ class RealtimeGateway {
     }, 25000);
 
     console.log('[RealtimeGateway] WebSocket server initialized on /ws (Keep-Alive ping active)');
+  }
+
+  broadcastPresence() {
+    if (!this.clients || this.clients.size === 0) return;
+    const stats = {
+      onlineUsers: this.clients.size,
+      waitingInQueue: matchmakingEngine.getQueueSize(),
+      activeSessions: Math.floor(sessionManager.sessions ? sessionManager.sessions.size : 0)
+    };
+    const payload = JSON.stringify({ event: 'presence_stats', data: stats });
+    for (const client of this.clients.values()) {
+      if (client.socket && client.socket.readyState === WebSocket.OPEN) {
+        try {
+          client.socket.send(payload);
+        } catch {}
+      }
+    }
   }
 
   handleConnection(ws, req) {
@@ -91,6 +113,7 @@ class RealtimeGateway {
     });
 
     log.wsConnect(userId, this.clients.size, clientRecord.ip);
+    this.broadcastPresence();
 
     // Handle incoming messages
     ws.on('message', (data) => {
@@ -315,6 +338,7 @@ class RealtimeGateway {
     matchmakingEngine.leaveQueue(userId);
 
     log.wsDisconnect(userId, this.clients.size);
+    this.broadcastPresence();
 
     // Grace period handling
     sessionManager.handleDisconnect(userId, (sessionId, partnerId) => {

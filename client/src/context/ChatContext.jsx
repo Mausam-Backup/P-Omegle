@@ -40,7 +40,7 @@ export function ChatProvider({ children }) {
 
   const [isStrangerTyping, setIsStrangerTyping] = useState(false);
   const typingTimeoutRef = useRef(null);
-  const [stats, setStats] = useState({ onlineUsers: 1420, waitingInQueue: 12 });
+  const [stats, setStats] = useState({ onlineUsers: 1, waitingInQueue: 0 });
 
   const signalListenersRef = useRef(new Map());
   const signalQueueRef = useRef([]); // Buffers early WebRTC signals until listener registers
@@ -97,17 +97,20 @@ export function ChatProvider({ children }) {
   // Poll online stats
   useEffect(() => {
     const fetchStats = async () => {
-      const data = await api.getOnlineStats();
-      if (data?.onlineUsers) {
-        setStats(prev => ({
-          ...prev,
-          onlineUsers: Math.max(data.onlineUsers, 1280),
-          waitingInQueue: data.waitingInQueue || 8
-        }));
-      }
+      try {
+        const data = await api.getOnlineStats();
+        if (data && typeof data.onlineUsers === 'number') {
+          setStats(prev => ({
+            ...prev,
+            onlineUsers: Math.max(1, data.onlineUsers),
+            waitingInQueue: data.waitingInQueue || 0,
+            activeSessions: data.activeSessions || 0
+          }));
+        }
+      } catch {}
     };
     fetchStats();
-    const interval = setInterval(fetchStats, 10000);
+    const interval = setInterval(fetchStats, 4000);
     return () => clearInterval(interval);
   }, []);
 
@@ -198,6 +201,18 @@ export function ChatProvider({ children }) {
 
   const handleSocketEvent = (event, data) => {
     switch (event) {
+      case 'presence_stats': {
+        if (data && typeof data.onlineUsers === 'number') {
+          setStats(prev => ({
+            ...prev,
+            onlineUsers: Math.max(1, data.onlineUsers),
+            waitingInQueue: data.waitingInQueue || 0,
+            activeSessions: data.activeSessions || 0
+          }));
+        }
+        break;
+      }
+
       case 'queued':
         setChatStatus('searching');
         break;

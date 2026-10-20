@@ -294,10 +294,13 @@ export function LobbyScreen({ webrtc }) {
             )}
           </div>
 
-          {/* Online count */}
-          <div className="lobby-stats-row">
-            <Users size={16} color="#6366f1" />
-            <span><strong>{stats.onlineUsers.toLocaleString()}</strong> people ready to chat now</span>
+          {/* Real-time Live Online Users Count */}
+          <div className="lobby-stats-row" aria-live="polite">
+            <span className="live-dot-pulse" title="Live real-time online count" />
+            <span>
+              <strong>{stats.onlineUsers.toLocaleString()}</strong> {stats.onlineUsers === 1 ? 'person' : 'people'} ready to chat now
+              {stats.waitingInQueue > 0 && <span className="queue-live-tag"> • {stats.waitingInQueue} in queue</span>}
+            </span>
           </div>
 
           {/* Start Call CTA */}
