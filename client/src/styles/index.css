@@ -1168,7 +1168,9 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 1rem 2rem 2rem 2rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .lobby-card {
@@ -1177,10 +1179,14 @@ html, body {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 24px;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 20px 48px -12px rgba(15, 23, 42, 0.08), 0 0 1px 1px rgba(15, 23, 42, 0.04);
   display: grid;
   grid-template-columns: 1fr 1fr;
   overflow: hidden;
+  position: relative;
+  z-index: 50;
+  margin-bottom: 6rem;
+  transform: translateY(-24px);
 }
 
 .lobby-preview-section {
@@ -2173,4 +2179,111 @@ html, body {
     padding: 0.35rem 0.85rem;
   }
 }
+
+/* ==============================================================================
+   17. MiroFish-Style Animated Doodle Crowd Layer
+   Dynamic, multi-depth hand-drawn OpenPeeps character walking crowd
+   ============================================================================== */
+.doodle-crowd-layer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 340px;
+  max-height: 48vh;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 10;
+  user-select: none;
+}
+
+/* Soft top fade so characters appear naturally into the bottom horizon */
+.doodle-crowd-fade-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 75px;
+  background: linear-gradient(to bottom, var(--bg-app) 0%, rgba(248, 250, 252, 0) 100%);
+  pointer-events: none;
+  z-index: 150;
+}
+
+/* Ground reference line */
+.doodle-crowd-groundline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(15, 23, 42, 0.08) 15%, rgba(15, 23, 42, 0.08) 85%, transparent 100%);
+  z-index: 160;
+}
+
+.doodle-crowd-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform: translateZ(0);
+}
+
+.doodle-peep-wrapper {
+  contain: layout style paint;
+  backface-visibility: hidden;
+}
+
+/* Natural walking bobbing animation */
+@keyframes doodleWalkBob {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(0.5deg);
+  }
+  100% {
+    transform: translateY(-1px) rotate(-0.5deg);
+  }
+}
+
+/* Speech bubble tooltip on character hover */
+.doodle-peep-bubble {
+  position: absolute;
+  top: -34px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f172a;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+  pointer-events: none;
+  z-index: 300;
+  animation: doodleBubblePop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.doodle-bubble-arrow {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 7px;
+  height: 7px;
+  background: #0f172a;
+}
+
+@keyframes doodleBubblePop {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(6px) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
 

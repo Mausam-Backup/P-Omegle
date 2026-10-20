@@ -3,6 +3,7 @@ import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
 import { Video, Mic, MicOff, VideoOff, Users, Plus, X, ShieldCheck } from 'lucide-react';
 import { DoodleCameraOff, DoodleAvatarHead } from '../doodles/DoodleCharacter';
+import { DoodleCrowdLayer } from '../doodles/DoodleCrowdLayer';
 
 const SUGGESTED_INTERESTS = ['tech', 'design', 'music', 'gaming', 'travel', 'crypto', 'art'];
 
@@ -176,6 +177,9 @@ export function LobbyScreen({ webrtc }) {
           </button>
         </div>
       </div>
+
+      {/* Dynamic Animated Doodle Crowd Layer (MiroFish style) */}
+      <DoodleCrowdLayer />
     </div>
   );
 }

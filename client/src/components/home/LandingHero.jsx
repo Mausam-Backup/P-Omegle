@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useChat } from '../../context/ChatContext';
 import { Video, MessageSquare, Plus, X, Sparkles, CheckCircle2 } from 'lucide-react';
+import { DoodleCrowdLayer } from '../doodles/DoodleCrowdLayer';
 
 const SUGGESTED_INTERESTS = [
   'gaming', 'music', 'anime', 'coding', 'movies', 'fitness', 'tech', 'art', 'philosophy', 'travel'
@@ -157,6 +158,9 @@ export function LandingHero() {
           <span>Start {mode === 'video' ? 'Video Chat' : 'Text Chat'}</span>
         </button>
       </div>
+
+      {/* Dynamic Animated Doodle Crowd Layer (MiroFish style) */}
+      <DoodleCrowdLayer />
     </div>
   );
 }
