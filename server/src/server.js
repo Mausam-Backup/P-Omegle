@@ -68,16 +68,14 @@ realtimeGateway.initialize(httpServer);
 // Start server
 httpServer.listen(config.port, config.host, () => {
   console.log(`
-=====================================================
-  Omegle Random Video Chat Platform Backend Running
-=====================================================
-  Port:            ${config.port}
-  Environment:     ${config.env}
-  REST API:        http://localhost:${config.port}/api
-  WebSocket Path:  ws://localhost:${config.port}/ws
-  Health Check:    http://localhost:${config.port}/health
-=====================================================
-  `);
+\x1b[36m╭─\x1b[1m 🚀 OMEGLE NEXT BACKEND SERVER \x1b[0m\x1b[36m───────────────────────────────────────╮\x1b[0m
+\x1b[36m│\x1b[0m  Port         : \x1b[1m${config.port}\x1b[0m                                                \x1b[36m│\x1b[0m
+\x1b[36m│\x1b[0m  Environment  : \x1b[32m${config.env}\x1b[0m                                          \x1b[36m│\x1b[0m
+\x1b[36m│\x1b[0m  REST API     : \x1b[34mhttp://${config.host}:${config.port}/api\x1b[0m                            \x1b[36m│\x1b[0m
+\x1b[36m│\x1b[0m  WebSocket    : \x1b[35mws://${config.host}:${config.port}/ws\x1b[0m                              \x1b[36m│\x1b[0m
+\x1b[36m│\x1b[0m  Health Check : \x1b[32mhttp://${config.host}:${config.port}/health\x1b[0m                         \x1b[36m│\x1b[0m
+\x1b[36m╰──────────────────────────────────────────────────────────────────╯\x1b[0m
+`);
 });
 
 // Graceful shutdown
