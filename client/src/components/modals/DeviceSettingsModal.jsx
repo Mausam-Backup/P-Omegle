@@ -29,7 +29,7 @@ export function DeviceSettingsModal() {
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title-row">
-            <Sliders size={20} color="#6366f1" />
+            <Sliders size={20} color="#0f172a" />
             <h3 className="modal-heading">Audio & Video Settings</h3>
           </div>
           <button className="modal-close-icon-btn" onClick={() => setIsSettingsModalOpen(false)}>

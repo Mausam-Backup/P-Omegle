@@ -28,7 +28,7 @@ export function UserProfileModal() {
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title-row">
-            <User size={20} color="#6366f1" />
+            <User size={20} color="#0f172a" />
             <h3 className="modal-heading">User Profile</h3>
           </div>
           <button className="modal-close-icon-btn" onClick={() => setIsProfileModalOpen(false)}>
@@ -74,7 +74,7 @@ export function UserProfileModal() {
           {/* Pro Membership Status Card */}
           <div className="pro-status-card">
             <div className="pro-status-left">
-              <Sparkles size={18} color="#a855f7" />
+              <Sparkles size={18} color="#d97706" />
               <div>
                 <div className="pro-status-title">Pro Status: {user?.isPro ? 'Active' : 'Free Member'}</div>
                 <div className="pro-status-sub">Access priority matching and HD video</div>

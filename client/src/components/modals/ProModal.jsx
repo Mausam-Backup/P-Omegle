@@ -26,7 +26,7 @@ export function ProModal() {
 
         <div className="pro-features-list">
           <div className="pro-feature-item">
-            <div className="feature-icon-box"><Zap size={18} color="#6366f1" /></div>
+            <div className="feature-icon-box"><Zap size={18} color="#0f172a" /></div>
             <div>
               <div className="feature-title">Instant Matching</div>
               <div className="feature-desc">Skip queues with priority routing directly to waiting partners.</div>
@@ -34,7 +34,7 @@ export function ProModal() {
           </div>
 
           <div className="pro-feature-item">
-            <div className="feature-icon-box"><Video size={18} color="#6366f1" /></div>
+            <div className="feature-icon-box"><Video size={18} color="#0f172a" /></div>
             <div>
               <div className="feature-title">1080p Ultra HD Video</div>
               <div className="feature-desc">Uncapped high-bitrate WebRTC video and spatial audio.</div>
@@ -42,7 +42,7 @@ export function ProModal() {
           </div>
 
           <div className="pro-feature-item">
-            <div className="feature-icon-box"><Globe size={18} color="#6366f1" /></div>
+            <div className="feature-icon-box"><Globe size={18} color="#0f172a" /></div>
             <div>
               <div className="feature-title">Country & Region Filter</div>
               <div className="feature-desc">Choose specific countries or global matching anytime.</div>
