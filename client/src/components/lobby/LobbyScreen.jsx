@@ -47,17 +47,22 @@ export function LobbyScreen({ webrtc }) {
 
   return (
     <div className="lobby-wrapper">
+      {/* Semantic H1 for Search Engines & Accessibility */}
+      <h1 className="sr-only">Omegle Next — Live Random Video Chat & Anonymous Text with Strangers</h1>
+
       <div className="lobby-card">
         {/* Left Side: Live Camera Test & Mic Checks */}
-        <div className="lobby-preview-section">
+        <section className="lobby-preview-section" aria-label="Camera and audio preview test">
           <div className="lobby-video-box">
             <video
+              id="lobby-preview-video"
               ref={previewVideoRef}
               autoPlay
               playsInline
               muted
               className="lobby-video-element"
               style={{ display: isPreviewLive ? 'block' : 'none' }}
+              aria-label="Local webcam preview"
             />
             {!isPreviewLive && (
               <div className="lobby-video-placeholder">
@@ -73,6 +78,7 @@ export function LobbyScreen({ webrtc }) {
             {/* In-box controls */}
             <div className="lobby-preview-controls">
               <button
+                id="btn-toggle-mic"
                 type="button"
                 className={`preview-pill-btn ${isAudioMuted ? 'off' : ''}`}
                 onClick={toggleMute}
@@ -83,6 +89,7 @@ export function LobbyScreen({ webrtc }) {
               </button>
 
               <button
+                id="btn-toggle-video"
                 type="button"
                 className={`preview-pill-btn ${isVideoOff ? 'off' : ''}`}
                 onClick={toggleVideo}
@@ -98,10 +105,10 @@ export function LobbyScreen({ webrtc }) {
             <ShieldCheck size={16} color="#10b981" />
             <span>P2P Encrypted • No recordings stored</span>
           </div>
-        </div>
+        </section>
 
         {/* Right Side: Profile & Room Configuration */}
-        <div className="lobby-settings-section">
+        <section className="lobby-settings-section" aria-label="Matching and profile settings">
           {/* User Profile Card */}
           <div className="lobby-user-header">
             <DoodleAvatarHead seed={user?.avatar || 'you'} size={48} />
@@ -113,6 +120,7 @@ export function LobbyScreen({ webrtc }) {
               <div className="lobby-user-sub">
                 {user?.isGuest ? 'Guest User' : user?.email} •{' '}
                 <button
+                  id="btn-edit-profile"
                   type="button"
                   className="link-btn"
                   onClick={() => setIsProfileModalOpen(true)}
@@ -138,6 +146,7 @@ export function LobbyScreen({ webrtc }) {
 
               {interests.length < 5 && (
                 <input
+                  id="input-match-tag"
                   type="text"
                   className="lobby-tag-input"
                   placeholder="Add interest (e.g. music)..."
@@ -171,11 +180,16 @@ export function LobbyScreen({ webrtc }) {
           </div>
 
           {/* Start Call CTA */}
-          <button className="start-call-cta-btn" onClick={startCall}>
+          <button
+            id="btn-start-video-call"
+            className="start-call-cta-btn"
+            onClick={startCall}
+            aria-label="Start random 1-on-1 video call"
+          >
             <Video size={20} />
             <span>Start Video Call</span>
           </button>
-        </div>
+        </section>
       </div>
 
       {/* Dynamic Animated Doodle Crowd Layer (MiroFish style) */}
