@@ -51,19 +51,7 @@ export function InstallPwaPrompt() {
 
       window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-      // On mobile devices, prompt after 2s
-      const mobileTimer = setTimeout(() => {
-        try {
-          if (sessionStorage.getItem('omegle_pwa_dismissed') !== 'true') {
-            setIsVisible(true);
-          }
-        } catch {
-          setIsVisible(true);
-        }
-      }, 2000);
-
       return () => {
-        clearTimeout(mobileTimer);
         window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       };
     } catch (err) {

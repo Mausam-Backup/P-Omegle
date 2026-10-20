@@ -139,31 +139,70 @@ export function useWebRTC() {
   const registerSignalListenerRef = useRef(registerSignalListener);
   registerSignalListenerRef.current = registerSignalListener;
 
+  const isUsingFallbackRef = useRef(false);
+
   // Auto-acquire camera & mic (default to front camera on mobile)
-  const initLocalMedia = useCallback(async (desiredFacing = 'user') => {
-    if (localStreamRef.current && localStreamRef.current.getTracks().some(t => t.readyState === 'live')) {
+  const initLocalMedia = useCallback(async (desiredFacing = 'user', forceRefresh = false) => {
+    if (!forceRefresh && localStreamRef.current && localStreamRef.current.getTracks().some(t => t.readyState === 'live') && !isUsingFallbackRef.current) {
       return localStreamRef.current;
     }
-    if (localMediaPromiseRef.current) {
+    if (localMediaPromiseRef.current && !forceRefresh) {
       return localMediaPromiseRef.current;
     }
 
     localMediaPromiseRef.current = (async () => {
       try {
-        const gdmPromise = navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: {
-            facingMode: desiredFacing,
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            frameRate: { ideal: 30, max: 30 }
-          }
-        });
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Physical camera busy or timed out')), 2500)
-        );
+        if (!navigator?.mediaDevices?.getUserMedia) {
+          throw new Error('navigator.mediaDevices.getUserMedia is not supported on this browser/environment');
+        }
 
-        const stream = await Promise.race([gdmPromise, timeoutPromise]);
+        let stream = null;
+
+        // Progressive acquisition: NO premature timeouts so user can comfortably tap "Allow"
+        // Tier 1: Front/Back facing camera with ideal resolution
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
+            },
+            video: {
+              facingMode: desiredFacing,
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            }
+          });
+        } catch (tier1Err) {
+          // If user explicitly tapped "Block" or "Deny", respect user choice
+          if (tier1Err.name === 'NotAllowedError' || tier1Err.name === 'PermissionDeniedError') {
+            throw tier1Err;
+          }
+
+          console.warn('[WebRTC] Tier 1 constraint failed, trying basic facingMode:', tier1Err.name, tier1Err.message);
+
+          // Tier 2: Flexible facingMode without resolution restrictions (works on budget mobile hardware)
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              audio: true,
+              video: { facingMode: desiredFacing }
+            });
+          } catch (tier2Err) {
+            if (tier2Err.name === 'NotAllowedError' || tier2Err.name === 'PermissionDeniedError') {
+              throw tier2Err;
+            }
+
+            console.warn('[WebRTC] Tier 2 constraint failed, trying generic video:', tier2Err.name);
+
+            // Tier 3: Any video device available on device
+            stream = await navigator.mediaDevices.getUserMedia({
+              audio: true,
+              video: true
+            });
+          }
+        }
+
+        isUsingFallbackRef.current = false;
         localStreamRef.current = stream;
         setLocalStream(stream);
         setIsVideoOff(false);
@@ -171,18 +210,30 @@ export function useWebRTC() {
         setFacingMode(desiredFacing);
         facingModeRef.current = desiredFacing;
         console.log(`[WebRTC] Physical camera (${desiredFacing}) and mic acquired successfully`);
+
+        // If an RTCPeerConnection is active, replace simulated tracks with real camera tracks
+        if (peerConnectionRef.current && peerConnectionRef.current.signalingState !== 'closed') {
+          const pc = peerConnectionRef.current;
+          const senders = pc.getSenders();
+          stream.getTracks().forEach((track) => {
+            const sender = senders.find(s => s.track && s.track.kind === track.kind);
+            if (sender) {
+              sender.replaceTrack(track).catch(e => console.warn('[WebRTC] replaceTrack error:', e));
+            } else {
+              try { pc.addTrack(track, stream); } catch {}
+            }
+          });
+        }
+
         return stream;
       } catch (err) {
         console.warn('[WebRTC] Physical camera access note:', err.name, err.message);
+        isUsingFallbackRef.current = true;
 
-        // Fallback: try physical audio with 1.5s timeout, plus canvas video
+        // Fallback: try physical audio alone, plus non-mirrored canvas video
         let audioTrack = null;
         try {
-          const audioPromise = navigator.mediaDevices.getUserMedia({ audio: true });
-          const audioTimeout = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Audio timeout')), 1500)
-          );
-          const audioStream = await Promise.race([audioPromise, audioTimeout]);
+          const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
           audioTrack = audioStream.getAudioTracks()[0] || null;
         } catch {
           audioTrack = createSilentAudioTrack();
@@ -196,8 +247,7 @@ export function useWebRTC() {
         localStreamRef.current = fallbackStream;
         setLocalStream(fallbackStream);
         setIsVideoOff(false);
-        setIsMirrored(false); // canvas fallback — don't mirror, text would appear backwards
-        console.log('[WebRTC] Using simulated fallback camera stream');
+        setIsMirrored(false); // Do not mirror fallback canvas
         return fallbackStream;
       } finally {
         localMediaPromiseRef.current = null;
@@ -554,8 +604,8 @@ export function useWebRTC() {
   };
 
   const toggleVideo = async () => {
-    if (!localStreamRef.current || localStreamRef.current.getVideoTracks().length === 0) {
-      await initLocalMedia();
+    if (!localStreamRef.current || localStreamRef.current.getVideoTracks().length === 0 || isUsingFallbackRef.current) {
+      await initLocalMedia(facingModeRef.current, true);
       return;
     }
 
@@ -658,7 +708,9 @@ export function useWebRTC() {
     toggleVideo,
     toggleMirror,
     toggleSwap,
-    initLocalMedia
+    initLocalMedia,
+    requestCameraAccess: () => initLocalMedia(facingModeRef.current, true),
+    isUsingFallback: isUsingFallbackRef.current
   };
 }
 
