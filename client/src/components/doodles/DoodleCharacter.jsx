@@ -411,3 +411,59 @@ export function DoodleMobileAppIcon({ size = 38, className = '' }) {
   );
 }
 
+// 7. Handcrafted Doodle Pro Crown & Sparkle Badge Icon
+export function DoodleProBadgeIcon({ size = 52, className = '', style = {} }) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ width: size, height: size, flexShrink: 0, ...style }}
+    >
+      {/* Hand-drawn rounded square / squircle badge container */}
+      <path
+        d="M26 12 C14 12 10 18 10 30 L10 70 C10 82 14 88 26 88 L74 88 C86 88 90 82 90 70 L90 30 C90 18 86 12 74 12 Z"
+        fill="#0f172a"
+        stroke="#1e293b"
+        strokeWidth="3.5"
+        strokeLinejoin="round"
+      />
+
+      {/* Hand-drawn Royal Crown with cute doodle points */}
+      <path
+        d="M26 62 L32 38 L44 50 L50 32 L56 50 L68 38 L74 62 Z"
+        fill="#ffffff"
+        stroke="#ffffff"
+        strokeWidth="3.5"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+
+      {/* Crown base band */}
+      <path
+        d="M25 64 Q50 67 75 64"
+        stroke="#0f172a"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+
+      {/* Crown Jewels - Cute doodle circles */}
+      <circle cx="32" cy="36" r="3" fill="#fbbf24" stroke="#ffffff" strokeWidth="1.5" />
+      <circle cx="50" cy="30" r="3.5" fill="#fbbf24" stroke="#ffffff" strokeWidth="1.5" />
+      <circle cx="68" cy="36" r="3" fill="#fbbf24" stroke="#ffffff" strokeWidth="1.5" />
+
+      {/* Cute winking doodle face on the crown body */}
+      <circle cx="43" cy="54" r="2" fill="#0f172a" />
+      <path d="M54 52 Q58 49 61 52" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" fill="none" />
+      <path d="M47 58 Q50 61 54 58" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" fill="none" />
+
+      {/* Hand-drawn Sparkle bursts around the badge */}
+      <path d="M78 20 L84 14 M81 17 L86 17" stroke="#fbbf24" strokeWidth="2.5" strokeLinecap="round" />
+      <circle cx="20" cy="22" r="2" fill="#fbbf24" />
+      <circle cx="82" cy="74" r="2.5" fill="#fbbf24" />
+    </svg>
+  );
+}
+
+

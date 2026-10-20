@@ -1,11 +1,9 @@
 // Service Worker for Omegle Next PWA (Progressive Web App)
-const CACHE_NAME = 'omegle-next-v1';
+const CACHE_NAME = 'omegle-next-v2';
+
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
   '/manifest.json',
-  '/favicon.svg',
-  '/peeps/openpeeps1.svg'
+  '/favicon.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -28,25 +26,74 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('fetch', (event) => {
-  // Only cache GET requests and bypass WebSocket / API requests
+  const { request } = event;
+
+  // Bypass non-GET, API, WebSocket, and external backend requests
   if (
-    event.request.method !== 'GET' ||
-    event.request.url.includes('/ws') ||
-    event.request.url.includes('/api/') ||
-    event.request.url.includes('onrender.com')
+    request.method !== 'GET' ||
+    request.url.includes('/ws') ||
+    request.url.includes('/api/') ||
+    request.url.includes('onrender.com') ||
+    request.url.startsWith('chrome-extension:')
   ) {
     return;
   }
 
+  // CRITICAL FIX FOR VERCEL BLANK SCREEN:
+  // For HTML navigation requests, ALWAYS fetch from Network first!
+  // This guarantees users always get the latest index.html with current Vite chunk hashes.
+  if (request.mode === 'navigate' || request.destination === 'document') {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          // Fallback to cached version ONLY if completely offline
+          return caches.match(request).then((cached) => cached || caches.match('/'));
+        })
+    );
+    return;
+  }
+
+  // For static assets (JS, CSS, images): Network first for JS/CSS chunks to avoid 404s after new builds
+  if (request.url.includes('/assets/')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // Other static assets (images, icons): Cache-first with network fallback
   event.respondWith(
-    caches.match(event.request).then((cached) => {
+    caches.match(request).then((cached) => {
       return (
         cached ||
-        fetch(event.request).catch(() => {
-          if (event.request.mode === 'navigate') {
-            return caches.match('/');
+        fetch(request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200 && request.url.startsWith(self.location.origin)) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
           }
+          return networkResponse;
         })
       );
     })

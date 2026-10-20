@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { X, Sparkles, Check, Zap, Globe, Shield, Video } from 'lucide-react';
+import { X, Check, Zap, Globe, Shield, Video } from 'lucide-react';
+import { DoodleProBadgeIcon } from '../doodles/DoodleCharacter';
 
 export function ProModal() {
   const { user, isProModalOpen, setIsProModalOpen, togglePro } = useAuth();
@@ -16,7 +17,7 @@ export function ProModal() {
 
         <div className="pro-modal-header">
           <div className="pro-badge-icon">
-            <Sparkles size={28} color="#ffffff" />
+            <DoodleProBadgeIcon size={58} />
           </div>
           <h2 className="pro-modal-title">Upgrade to Pro</h2>
           <p className="pro-modal-subtitle">
