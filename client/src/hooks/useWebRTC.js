@@ -114,6 +114,7 @@ export function useWebRTC() {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isMirrored, setIsMirrored] = useState(true);
   const [isSwapped, setIsSwapped] = useState(false);
+  const [connectionState, setConnectionState] = useState('new');
   const [facingMode, setFacingMode] = useState('user'); // 'user' (front) | 'environment' (back)
   const facingModeRef = useRef('user');
 
