@@ -125,6 +125,17 @@ export function ChatProvider({ children }) {
 
     ws.onopen = () => {
       console.log('[WS] Connected to Live Video Gateway');
+      // If client was searching when socket disconnected, immediately re-enqueue
+      if (chatStatus === 'searching') {
+        ws.send(JSON.stringify({
+          action: 'join_queue',
+          payload: {
+            mode,
+            interests,
+            language: navigator.language || 'en'
+          }
+        }));
+      }
     };
 
     ws.onmessage = (event) => {
@@ -138,13 +149,14 @@ export function ChatProvider({ children }) {
     };
 
     ws.onclose = () => {
-      reconnectTimeoutRef.current = setTimeout(connectWebSocket, 3000);
+      console.log('[WS] Socket disconnected, scheduling reconnect...');
+      reconnectTimeoutRef.current = setTimeout(connectWebSocket, 2000);
     };
 
     ws.onerror = (err) => {
       console.error('[WS] Socket error', err);
     };
-  }, []);
+  }, [chatStatus, mode, interests]);
 
   useEffect(() => {
     connectWebSocket();
@@ -153,6 +165,20 @@ export function ChatProvider({ children }) {
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
     };
   }, [connectWebSocket]);
+
+  // Keep-alive heartbeat every 15s to prevent Render/Cloudflare from dropping idle WebSockets
+  useEffect(() => {
+    const heartbeatTimer = setInterval(() => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({
+          action: 'heartbeat',
+          payload: { sessionId }
+        }));
+      }
+    }, 15000);
+
+    return () => clearInterval(heartbeatTimer);
+  }, [sessionId]);
 
   const handleSocketEvent = (event, data) => {
     switch (event) {
@@ -163,9 +189,10 @@ export function ChatProvider({ children }) {
       case 'matched': {
         sounds.playMatchChime();
         // ── Transition to call view ──────────────────────────────────────────
-        // Both peers must switch to 'call' view on receiving this event.
-        // Previously this was missing, so peers stayed on the lobby screen.
-        signalQueueRef.current = [];
+        // Preserve any early signals arriving for THIS new session, discard older ones
+        signalQueueRef.current = signalQueueRef.current.filter(
+          item => (item.data?.sessionId || item.data?.payload?.sessionId) === data.sessionId
+        );
         setCurrentView('call');
         setChatStatus('matched');
         setIsLive(true);

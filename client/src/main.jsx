@@ -15,3 +15,13 @@ createRoot(document.getElementById('root')).render(
     </AuthProvider>
   </ErrorBoundary>
 );
+
+// Register Service Worker for PWA Installation & Fullscreen Experience
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.warn('[PWA] Service worker registration note:', err);
+    });
+  });
+}
+

@@ -114,7 +114,8 @@ export function useWebRTC() {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isMirrored, setIsMirrored] = useState(true);
   const [isSwapped, setIsSwapped] = useState(false);
-  const [connectionState, setConnectionState] = useState('new');
+  const [facingMode, setFacingMode] = useState('user'); // 'user' (front) | 'environment' (back)
+  const facingModeRef = useRef('user');
 
   const peerConnectionRef = useRef(null);
   const localStreamRef = useRef(null);
@@ -128,8 +129,8 @@ export function useWebRTC() {
   const registerSignalListenerRef = useRef(registerSignalListener);
   registerSignalListenerRef.current = registerSignalListener;
 
-  // Auto-acquire camera & mic (or fallback simulated stream)
-  const initLocalMedia = useCallback(async () => {
+  // Auto-acquire camera & mic (default to front camera on mobile)
+  const initLocalMedia = useCallback(async (desiredFacing = 'user') => {
     if (localStreamRef.current && localStreamRef.current.getTracks().some(t => t.readyState === 'live')) {
       return localStreamRef.current;
     }
@@ -142,21 +143,24 @@ export function useWebRTC() {
         const gdmPromise = navigator.mediaDevices.getUserMedia({
           audio: true,
           video: {
+            facingMode: desiredFacing,
             width: { ideal: 1280 },
             height: { ideal: 720 },
             frameRate: { ideal: 30, max: 30 }
           }
         });
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Physical camera busy or timed out')), 2000)
+          setTimeout(() => reject(new Error('Physical camera busy or timed out')), 2500)
         );
 
         const stream = await Promise.race([gdmPromise, timeoutPromise]);
         localStreamRef.current = stream;
         setLocalStream(stream);
         setIsVideoOff(false);
-        setIsMirrored(true);
-        console.log('[WebRTC] Physical camera and mic acquired successfully');
+        setIsMirrored(desiredFacing === 'user');
+        setFacingMode(desiredFacing);
+        facingModeRef.current = desiredFacing;
+        console.log(`[WebRTC] Physical camera (${desiredFacing}) and mic acquired successfully`);
         return stream;
       } catch (err) {
         console.warn('[WebRTC] Physical camera access note:', err.name, err.message);
@@ -556,6 +560,63 @@ export function useWebRTC() {
     setIsSwapped(prev => !prev);
   };
 
+  const switchCamera = useCallback(async () => {
+    try {
+      const nextMode = facingModeRef.current === 'user' ? 'environment' : 'user';
+      console.log(`[WebRTC] Flipping camera to: ${nextMode}`);
+
+      let newStream;
+      try {
+        newStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { exact: nextMode },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        });
+      } catch (e) {
+        // Fallback without exact constraint if device doesn't support 'exact'
+        newStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: nextMode,
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        });
+      }
+
+      const newVideoTrack = newStream.getVideoTracks()[0];
+      if (!newVideoTrack) return;
+
+      if (localStreamRef.current) {
+        const oldTracks = localStreamRef.current.getVideoTracks();
+        oldTracks.forEach(t => t.stop());
+
+        const currentAudio = localStreamRef.current.getAudioTracks();
+        const updatedStream = new MediaStream([...currentAudio, newVideoTrack]);
+        localStreamRef.current = updatedStream;
+        setLocalStream(updatedStream);
+      }
+
+      // Front camera mirrored, rear camera unmirrored
+      setIsMirrored(nextMode === 'user');
+      setFacingMode(nextMode);
+      facingModeRef.current = nextMode;
+
+      // Replace track on live RTCPeerConnection sender
+      if (peerConnectionRef.current && peerConnectionRef.current.signalingState !== 'closed') {
+        const senders = peerConnectionRef.current.getSenders();
+        const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+        if (videoSender) {
+          await videoSender.replaceTrack(newVideoTrack);
+          console.log('[WebRTC] RTCPeerConnection video sender track replaced successfully');
+        }
+      }
+    } catch (err) {
+      console.warn('[WebRTC] Switch camera error:', err.name, err.message);
+    }
+  }, []);
+
   return {
     localStream,
     remoteStream,
@@ -564,6 +625,8 @@ export function useWebRTC() {
     isVideoOff,
     isMirrored,
     isSwapped,
+    facingMode,
+    switchCamera,
     connectionState,
     toggleMute,
     toggleVideo,
@@ -572,3 +635,4 @@ export function useWebRTC() {
     initLocalMedia
   };
 }
+

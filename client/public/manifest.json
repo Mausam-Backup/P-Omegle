@@ -1,16 +1,21 @@
 {
-  "short_name": "VideoChat",
+  "short_name": "Omegle Next",
   "name": "Omegle Next — Live Random Video & Text Chat",
+  "description": "Connect instantly with verified strangers in 1-on-1 random video and text chat.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
   "icons": [
     {
       "src": "/favicon.svg",
       "type": "image/svg+xml",
-      "sizes": "192x192 512x512"
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": "/",
-  "background_color": "#0f172a",
-  "theme_color": "#4f46e5",
-  "display": "standalone",
-  "orientation": "portrait"
+  "categories": ["social", "entertainment", "communications"]
 }

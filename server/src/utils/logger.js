@@ -1,7 +1,6 @@
 /**
- * Clean Terminal Logger
- * Formats events into compact, column-aligned single-line status logs.
- * Filters out high-frequency polling noise like /api/stats/online and /health.
+ * Clean Terminal Logger for Render CMD & Local Development
+ * Formats events into crystal-clear, descriptive lines visible in all console environments.
  */
 
 const ANSI = {
@@ -24,81 +23,67 @@ function timestamp() {
 }
 
 export function shortId(id = '') {
-  if (!id) return '';
-  if (id.startsWith('guest_')) return '#' + id.slice(6, 12);
-  if (id.startsWith('usr_')) return '@' + id.slice(4, 10);
-  if (id.startsWith('sess_')) return 'sess#' + id.slice(5, 11);
-  return id.length > 8 ? id.slice(0, 8) : id;
+  return id || 'unknown';
 }
 
 export const log = {
-  wsConnect(userId, onlineCount) {
-    const time = `${ANSI.gray}[${timestamp()}]${ANSI.reset}`;
-    const tag = `${ANSI.cyan}${ANSI.bold}[WS]    ${ANSI.reset}`;
-    console.log(`${time} ${tag} 🟢 Connect    ${ANSI.bold}${shortId(userId).padEnd(9)}${ANSI.reset} ${ANSI.dim}(${onlineCount} online)${ANSI.reset}`);
+  wsConnect(userId, onlineCount, ip = 'unknown') {
+    const time = `[${timestamp()}]`;
+    console.log(`${time} [WS] 🟢 CLIENT CONNECTED: user=${userId} | IP=${ip} | (Total Online: ${onlineCount})`);
   },
 
-  wsDisconnect(userId, onlineCount) {
-    const time = `${ANSI.gray}[${timestamp()}]${ANSI.reset}`;
-    const tag = `${ANSI.cyan}${ANSI.bold}[WS]    ${ANSI.reset}`;
-    console.log(`${time} ${tag} 🔴 Disconn    ${ANSI.bold}${shortId(userId).padEnd(9)}${ANSI.reset} ${ANSI.dim}(${onlineCount} online)${ANSI.reset}`);
+  wsDisconnect(userId, onlineCount, reason = '') {
+    const time = `[${timestamp()}]`;
+    const reasonStr = reason ? ` | reason=${reason}` : '';
+    console.log(`${time} [WS] 🔴 CLIENT DISCONNECTED: user=${userId}${reasonStr} | (Remaining Online: ${onlineCount})`);
   },
 
   queueJoin(userId, mode, interests = [], poolSize = 0) {
-    const time = `${ANSI.gray}[${timestamp()}]${ANSI.reset}`;
-    const tag = `${ANSI.yellow}${ANSI.bold}[QUEUE] ${ANSI.reset}`;
+    const time = `[${timestamp()}]`;
     const tagsStr = interests.length > 0 ? `[${interests.join(', ')}]` : 'any';
-    console.log(`${time} ${tag} ⏳ Enqueue    ${ANSI.bold}${shortId(userId).padEnd(9)}${ANSI.reset} ${mode} ${ANSI.dim}(tags: ${tagsStr} | pool: ${poolSize})${ANSI.reset}`);
+    console.log(`${time} [QUEUE] ⏳ USER ENQUEUED: user=${userId} | mode=${mode} | interests=${tagsStr} | (Waiting Pool: ${poolSize})`);
   },
 
   queueLeave(userId) {
-    const time = `${ANSI.gray}[${timestamp()}]${ANSI.reset}`;
-    const tag = `${ANSI.yellow}${ANSI.bold}[QUEUE] ${ANSI.reset}`;
-    console.log(`${time} ${tag} 🚪 Dequeue    ${shortId(userId)}`);
+    const time = `[${timestamp()}]`;
+    console.log(`${time} [QUEUE] 🚪 USER DEQUEUED: user=${userId}`);
   },
 
   match(peerA, peerB, sessionId, mode, tags = []) {
-    const time = `${ANSI.gray}[${timestamp()}]${ANSI.reset}`;
-    const tag = `${ANSI.magenta}${ANSI.bold}[MATCH] ${ANSI.reset}`;
-    const tagsStr = tags.length ? ` ${ANSI.dim}(#${tags.join(', #')})${ANSI.reset}` : '';
-    console.log(`${time} ${tag} 🎯 Paired     ${ANSI.bold}${shortId(peerA)}${ANSI.reset} ⇄ ${ANSI.bold}${shortId(peerB)}${ANSI.reset}  ${ANSI.dim}${shortId(sessionId)}${ANSI.reset}${tagsStr}`);
+    const time = `[${timestamp()}]`;
+    const tagsStr = tags.length ? ` | tags=[${tags.join(', ')}]` : '';
+    console.log(`${time} [MATCH] 🎯 PAIR MATCHED! userA=${peerA} ⇄ userB=${peerB} | session=${sessionId} | mode=${mode}${tagsStr}`);
   },
 
   rtc(action, senderId, receiverId) {
-    const time = `${ANSI.gray}[${timestamp()}]${ANSI.reset}`;
-    const tag = `${ANSI.blue}${ANSI.bold}[RTC]   ${ANSI.reset}`;
-    const symbol = action === 'offer' ? '📡 Offer' : action === 'answer' ? '🤝 Answer' : '⚡ Media';
-    console.log(`${time} ${tag} ${symbol.padEnd(9)}  ${shortId(senderId)} ➔ ${shortId(receiverId)}`);
+    const time = `[${timestamp()}]`;
+    console.log(`${time} [RTC] 📡 RELAY: action=${action} | from=${senderId} ➔ to=${receiverId}`);
   },
 
   chat(userId, text = '') {
-    const time = `${ANSI.gray}[${timestamp()}]${ANSI.reset}`;
-    const tag = `${ANSI.green}${ANSI.bold}[CHAT]  ${ANSI.reset}`;
+    const time = `[${timestamp()}]`;
     const preview = text.length > 32 ? text.slice(0, 32) + '...' : text;
-    console.log(`${time} ${tag} 💬 ${shortId(userId)}: "${preview}"`);
+    console.log(`${time} [CHAT] 💬 user=${userId}: "${preview}"`);
   },
 
   skip(userId, sessionId) {
-    const time = `${ANSI.gray}[${timestamp()}]${ANSI.reset}`;
-    const tag = `${ANSI.yellow}${ANSI.bold}[SKIP]  ${ANSI.reset}`;
-    console.log(`${time} ${tag} ⏭️  Skipped    ${shortId(userId)}  ${ANSI.dim}(${shortId(sessionId)})${ANSI.reset}`);
+    const time = `[${timestamp()}]`;
+    console.log(`${time} [SKIP] ⏭️ USER SKIPPED: user=${userId} | session=${sessionId}`);
   },
 
-  partnerLeft(sessionId) {
-    const time = `${ANSI.gray}[${timestamp()}]${ANSI.reset}`;
-    const tag = `${ANSI.red}${ANSI.bold}[LEFT]  ${ANSI.reset}`;
-    console.log(`${time} ${tag} ⚠️ Stranger left  ${ANSI.dim}(${shortId(sessionId)})${ANSI.reset}`);
+  partnerLeft(sessionId, partnerId = '') {
+    const time = `[${timestamp()}]`;
+    const partnerStr = partnerId ? ` | partner=${partnerId}` : '';
+    console.log(`${time} [LEFT] ⚠️ PARTNER LEFT: session=${sessionId}${partnerStr}`);
   },
 
   http(method, path, status, duration) {
-    // Silence routine background polling to keep the terminal uncluttered
+    // Silence routine background polling to keep Render CMD uncluttered
     if (path.startsWith('/api/stats/online') || path === '/health' || path.startsWith('/api/turn-credentials')) {
-      if (status < 400) return; // Only log if there's an error on polling endpoints
+      if (status < 400) return;
     }
 
-    const time = `${ANSI.gray}[${timestamp()}]${ANSI.reset}`;
-    const tag = `${ANSI.gray}[HTTP]  ${ANSI.reset}`;
-    const color = status >= 500 ? ANSI.red : status >= 400 ? ANSI.yellow : ANSI.green;
-    console.log(`${time} ${tag} ⚡ ${method.padEnd(5)} ${path.padEnd(22)} ${color}${status}${ANSI.reset} ${ANSI.dim}(${duration}ms)${ANSI.reset}`);
+    const time = `[${timestamp()}]`;
+    console.log(`${time} [HTTP] ⚡ ${method} ${path} -> ${status} (${duration}ms)`);
   }
 };

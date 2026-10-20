@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
-import { Video, Mic, MicOff, VideoOff, Users, Plus, X, ShieldCheck } from 'lucide-react';
+import { Video, Mic, MicOff, VideoOff, Users, Plus, X, ShieldCheck, SwitchCamera } from 'lucide-react';
 import { DoodleCameraOff, DoodleAvatarHead } from '../doodles/DoodleCharacter';
 import { DoodleCrowdLayer } from '../doodles/DoodleCrowdLayer';
 
@@ -10,7 +10,7 @@ const SUGGESTED_INTERESTS = ['tech', 'design', 'music', 'gaming', 'travel', 'cry
 export function LobbyScreen({ webrtc }) {
   const { startCall, interests, setInterests, stats } = useChat();
   const { user, setIsProfileModalOpen } = useAuth();
-  const { localStream, isAudioMuted, isVideoOff, toggleMute, toggleVideo } = webrtc;
+  const { localStream, isAudioMuted, isVideoOff, toggleMute, toggleVideo, facingMode, switchCamera } = webrtc;
 
   const previewVideoRef = useRef(null);
   const [tagInput, setTagInput] = useState('');
@@ -97,6 +97,18 @@ export function LobbyScreen({ webrtc }) {
               >
                 {isVideoOff ? <VideoOff size={15} strokeWidth={2.2} /> : <Video size={15} strokeWidth={2.2} />}
                 <span>{isVideoOff ? 'Video Off' : 'Camera On'}</span>
+              </button>
+
+              <button
+                id="btn-switch-camera"
+                type="button"
+                className={`preview-pill-btn ${facingMode === 'environment' ? 'active-flip' : ''}`}
+                onClick={switchCamera}
+                title={facingMode === 'user' ? "Flip to Rear Camera" : "Flip to Front Camera"}
+                aria-label="Rotate / Switch Camera"
+              >
+                <SwitchCamera size={15} strokeWidth={2.2} />
+                <span>{facingMode === 'environment' ? 'Back' : 'Flip'}</span>
               </button>
             </div>
           </div>

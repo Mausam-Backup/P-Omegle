@@ -26,7 +26,18 @@ class RealtimeGateway {
       this.broadcastMatches();
     }, 200);
 
-    console.log('[RealtimeGateway] WebSocket server initialized on /ws');
+    // Keep-alive ping frames every 25 seconds to prevent Render / Cloudflare proxy drop
+    setInterval(() => {
+      for (const client of this.clients.values()) {
+        if (client.socket && client.socket.readyState === WebSocket.OPEN) {
+          try {
+            client.socket.ping();
+          } catch {}
+        }
+      }
+    }, 25000);
+
+    console.log('[RealtimeGateway] WebSocket server initialized on /ws (Keep-Alive ping active)');
   }
 
   handleConnection(ws, req) {
@@ -78,7 +89,7 @@ class RealtimeGateway {
       isGuest: !user
     });
 
-    log.wsConnect(userId, this.clients.size);
+    log.wsConnect(userId, this.clients.size, clientRecord.ip);
 
     // Handle incoming messages
     ws.on('message', (data) => {

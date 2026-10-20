@@ -13,7 +13,8 @@ import {
   Camera,
   UserX,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  SwitchCamera
 } from 'lucide-react';
 import {
   DoodleStranger,
@@ -47,7 +48,9 @@ export function LiveVideoStage({ webrtc }) {
     isMirrored,
     connectionState,
     toggleMute,
-    toggleVideo
+    toggleVideo,
+    facingMode,
+    switchCamera
   } = webrtc;
 
   const localVideoRef = useRef(null);
@@ -472,6 +475,16 @@ export function LiveVideoStage({ webrtc }) {
             title={isVideoOff ? "Turn Video On (V)" : "Turn Video Off (V)"}
           >
             {isVideoOff ? <VideoOff size={19} /> : <Video size={19} />}
+          </button>
+
+          {/* Switch / Flip Camera Button (Front vs Rear Camera) */}
+          <button
+            className={`control-circle-btn switch-camera-btn ${facingMode === 'environment' ? 'active-rear' : ''}`}
+            onClick={switchCamera}
+            title={facingMode === 'user' ? "Flip to Back Camera (Environment)" : "Flip to Front Camera (User)"}
+            aria-label="Rotate / Switch Camera"
+          >
+            <SwitchCamera size={19} />
           </button>
 
           <button
