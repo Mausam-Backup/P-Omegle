@@ -10,7 +10,20 @@ const SUGGESTED_INTERESTS = ['tech', 'design', 'music', 'gaming', 'travel', 'cry
 export function LobbyScreen({ webrtc }) {
   const { startCall, interests, setInterests, stats } = useChat();
   const { user, setIsProfileModalOpen } = useAuth();
-  const { localStream, isAudioMuted, isVideoOff, toggleMute, toggleVideo, facingMode, switchCamera } = webrtc;
+  const {
+    localStream,
+    isAudioMuted,
+    isVideoOff,
+    toggleMute,
+    toggleVideo,
+    facingMode,
+    switchCamera,
+    isMirrored,
+    isCameraLoading,
+    cameraPermissionState,
+    cameraError,
+    requestCameraAccess
+  } = webrtc;
 
   const previewVideoRef = useRef(null);
   const [tagInput, setTagInput] = useState('');
@@ -22,12 +35,31 @@ export function LobbyScreen({ webrtc }) {
   });
 
   useEffect(() => {
-    if (previewVideoRef.current && localStream) {
-      if (previewVideoRef.current.srcObject !== localStream) {
-        previewVideoRef.current.srcObject = localStream;
-      }
-      previewVideoRef.current.play?.().catch(() => {});
+    const video = previewVideoRef.current;
+    if (!video || !localStream) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+
+    if (video.srcObject !== localStream) {
+      video.srcObject = localStream;
     }
+
+    const playVideo = () => {
+      video.play().catch((err) => {
+        console.warn('[Lobby] Video play note:', err.message);
+      });
+    };
+
+    video.addEventListener('loadedmetadata', playVideo);
+    if (video.readyState >= 2) {
+      playVideo();
+    }
+
+    return () => {
+      video.removeEventListener('loadedmetadata', playVideo);
+    };
   }, [localStream, isVideoOff]);
 
   const addTag = (tag) => {
@@ -49,7 +81,7 @@ export function LobbyScreen({ webrtc }) {
     }
   };
 
-  const isPreviewLive = Boolean(localStream && !isVideoOff);
+  const isPreviewLive = Boolean(localStream && !isVideoOff && localStream.getVideoTracks().some(t => t.readyState === 'live'));
 
   return (
     <div className="lobby-wrapper">
@@ -60,17 +92,29 @@ export function LobbyScreen({ webrtc }) {
         {/* Left Side: Live Camera Test & Mic Checks */}
         <section className="lobby-preview-section" aria-label="Camera and audio preview test">
           <div className="lobby-video-box">
-            <video
-              id="lobby-preview-video"
-              ref={previewVideoRef}
-              autoPlay
-              playsInline
-              muted
-              className="lobby-video-element"
-              style={{ display: isPreviewLive ? 'block' : 'none' }}
-              aria-label="Local webcam preview"
-            />
-            {!isPreviewLive && (
+            {isPreviewLive ? (
+              <video
+                id="lobby-preview-video"
+                ref={previewVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className={`lobby-video-element ${isMirrored ? 'mirrored' : ''}`}
+                aria-label="Local webcam preview"
+              />
+            ) : isCameraLoading ? (
+              <div className="lobby-camera-loading-state">
+                <div className="camera-loader-pulsar">
+                  <Video size={36} className="camera-loader-icon" />
+                  <div className="pulse-ring pulse-1" />
+                  <div className="pulse-ring pulse-2" />
+                </div>
+                <div className="camera-status-heading">Starting Camera...</div>
+                <div className="camera-status-caption">
+                  Please tap <strong>"Allow"</strong> if prompted by your browser
+                </div>
+              </div>
+            ) : isVideoOff && localStream ? (
               <div className="lobby-video-placeholder">
                 <div className="lobby-placeholder-doodle">
                   <DoodleCameraOff style={{ width: '100%', height: '100%', maxWidth: 140, maxHeight: 140 }} />
@@ -78,6 +122,34 @@ export function LobbyScreen({ webrtc }) {
                 <div className="lobby-camera-status-text">
                   Camera is turned off
                 </div>
+                <button
+                  type="button"
+                  className="lobby-enable-camera-btn secondary"
+                  onClick={toggleVideo}
+                  style={{ marginTop: '0.75rem' }}
+                >
+                  Turn On Camera
+                </button>
+              </div>
+            ) : (
+              /* State: Denied, Prompt, or Waiting for User Gesture in Incognito */
+              <div className="lobby-camera-denied-state">
+                <div className="camera-denied-icon-badge">
+                  <Video size={34} color="#6366f1" />
+                </div>
+                <div className="camera-status-heading">Camera Access Required</div>
+                <div className="camera-status-caption">
+                  Tap below to allow camera & microphone access to preview your live video.
+                </div>
+                <button
+                  type="button"
+                  id="btn-enable-camera"
+                  className="lobby-enable-camera-btn"
+                  onClick={() => requestCameraAccess()}
+                >
+                  <Video size={16} />
+                  <span>Enable Camera & Mic</span>
+                </button>
               </div>
             )}
 
@@ -98,7 +170,13 @@ export function LobbyScreen({ webrtc }) {
                 id="btn-toggle-video"
                 type="button"
                 className={`preview-pill-btn ${isVideoOff ? 'off' : ''}`}
-                onClick={toggleVideo}
+                onClick={async () => {
+                  if (!localStream) {
+                    await requestCameraAccess();
+                  } else {
+                    toggleVideo();
+                  }
+                }}
                 aria-label={isVideoOff ? 'Turn On Camera' : 'Turn Off Camera'}
               >
                 {isVideoOff ? <VideoOff size={15} strokeWidth={2.2} /> : <Video size={15} strokeWidth={2.2} />}
@@ -226,7 +304,14 @@ export function LobbyScreen({ webrtc }) {
           <button
             id="btn-start-video-call"
             className="start-call-cta-btn"
-            onClick={startCall}
+            onClick={async () => {
+              if (!localStream) {
+                try {
+                  await requestCameraAccess();
+                } catch {}
+              }
+              startCall();
+            }}
             aria-label="Start random 1-on-1 video call"
           >
             <Video size={20} />

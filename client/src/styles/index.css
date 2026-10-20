@@ -1404,7 +1404,128 @@ html, body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.lobby-video-element.mirrored {
   transform: scaleX(-1);
+}
+
+.lobby-camera-loading-state,
+.lobby-camera-denied-state {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
+  color: #ffffff;
+  padding: 1.5rem 1.25rem 4rem;
+  box-sizing: border-box;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.camera-loader-pulsar {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.85rem;
+}
+
+.camera-loader-icon {
+  color: #818cf8;
+  z-index: 2;
+  filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.6));
+}
+
+.pulse-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(99, 102, 241, 0.5);
+  animation: pulseExpand 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+
+.pulse-ring.pulse-2 {
+  animation-delay: 0.75s;
+}
+
+@keyframes pulseExpand {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.camera-status-heading {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.01em;
+}
+
+.camera-status-caption {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  max-width: 260px;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+}
+
+.camera-status-caption strong {
+  color: #a5b4fc;
+}
+
+.camera-denied-icon-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1.5px solid rgba(99, 102, 241, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.85rem;
+}
+
+.lobby-enable-camera-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  transition: all 0.2s ease;
+}
+
+.lobby-enable-camera-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+}
+
+.lobby-enable-camera-btn.secondary {
+  background: #334155;
+  box-shadow: none;
+}
+.lobby-enable-camera-btn.secondary:hover {
+  background: #475569;
 }
 
 .lobby-video-placeholder {

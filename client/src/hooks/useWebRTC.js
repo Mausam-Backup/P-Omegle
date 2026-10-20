@@ -127,6 +127,10 @@ export function useWebRTC() {
   const [facingMode, setFacingMode] = useState('user'); // 'user' (front) | 'environment' (back)
   const facingModeRef = useRef('user');
 
+  const [isCameraLoading, setIsCameraLoading] = useState(true);
+  const [cameraPermissionState, setCameraPermissionState] = useState('prompt'); // 'prompt' | 'granted' | 'denied' | 'error'
+  const [cameraError, setCameraError] = useState(null);
+
   const peerConnectionRef = useRef(null);
   const localStreamRef = useRef(null);
   const localMediaPromiseRef = useRef(null);
@@ -143,22 +147,25 @@ export function useWebRTC() {
 
   // Auto-acquire camera & mic (default to front camera on mobile)
   const initLocalMedia = useCallback(async (desiredFacing = 'user', forceRefresh = false) => {
-    if (!forceRefresh && localStreamRef.current && localStreamRef.current.getTracks().some(t => t.readyState === 'live') && !isUsingFallbackRef.current) {
+    if (!forceRefresh && localStreamRef.current && localStreamRef.current.getTracks().some(t => t.readyState === 'live')) {
       return localStreamRef.current;
     }
     if (localMediaPromiseRef.current && !forceRefresh) {
       return localMediaPromiseRef.current;
     }
 
+    setIsCameraLoading(true);
+    setCameraError(null);
+
     localMediaPromiseRef.current = (async () => {
       try {
         if (!navigator?.mediaDevices?.getUserMedia) {
-          throw new Error('navigator.mediaDevices.getUserMedia is not supported on this browser/environment');
+          throw new Error('Camera access is not supported on this browser or connection is not secure (HTTPS)');
         }
 
         let stream = null;
 
-        // Progressive acquisition: NO premature timeouts so user can comfortably tap "Allow"
+        // Progressive acquisition with ideal constraints
         // Tier 1: Front/Back facing camera with ideal resolution
         try {
           stream = await navigator.mediaDevices.getUserMedia({
@@ -168,7 +175,7 @@ export function useWebRTC() {
               autoGainControl: true
             },
             video: {
-              facingMode: desiredFacing,
+              facingMode: { ideal: desiredFacing },
               width: { ideal: 1280 },
               height: { ideal: 720 }
             }
@@ -179,13 +186,13 @@ export function useWebRTC() {
             throw tier1Err;
           }
 
-          console.warn('[WebRTC] Tier 1 constraint failed, trying basic facingMode:', tier1Err.name, tier1Err.message);
+          console.warn('[WebRTC] Tier 1 constraint failed, trying basic facingMode:', tier1Err.name);
 
-          // Tier 2: Flexible facingMode without resolution restrictions (works on budget mobile hardware)
+          // Tier 2: Flexible facingMode without resolution restrictions
           try {
             stream = await navigator.mediaDevices.getUserMedia({
               audio: true,
-              video: { facingMode: desiredFacing }
+              video: { facingMode: { ideal: desiredFacing } }
             });
           } catch (tier2Err) {
             if (tier2Err.name === 'NotAllowedError' || tier2Err.name === 'PermissionDeniedError') {
@@ -195,16 +202,37 @@ export function useWebRTC() {
             console.warn('[WebRTC] Tier 2 constraint failed, trying generic video:', tier2Err.name);
 
             // Tier 3: Any video device available on device
-            stream = await navigator.mediaDevices.getUserMedia({
-              audio: true,
-              video: true
-            });
+            try {
+              stream = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: true
+              });
+            } catch (tier3Err) {
+              if (tier3Err.name === 'NotAllowedError' || tier3Err.name === 'PermissionDeniedError') {
+                throw tier3Err;
+              }
+
+              // Tier 4: Query video and audio separately (bypasses device-lock on some Android hardware)
+              console.warn('[WebRTC] Tier 3 failed, attempting split video/audio acquisition:', tier3Err.name);
+              const videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+              let audioTrack = null;
+              try {
+                const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioTrack = audioStream.getAudioTracks()[0] || null;
+              } catch {}
+              const combinedTracks = [...videoStream.getVideoTracks()];
+              if (audioTrack) combinedTracks.push(audioTrack);
+              stream = new MediaStream(combinedTracks);
+            }
           }
         }
 
         isUsingFallbackRef.current = false;
         localStreamRef.current = stream;
         setLocalStream(stream);
+        setIsCameraLoading(false);
+        setCameraPermissionState('granted');
+        setCameraError(null);
         setIsVideoOff(false);
         setIsMirrored(desiredFacing === 'user');
         setFacingMode(desiredFacing);
@@ -228,27 +256,23 @@ export function useWebRTC() {
         return stream;
       } catch (err) {
         console.warn('[WebRTC] Physical camera access note:', err.name, err.message);
-        isUsingFallbackRef.current = true;
+        setIsCameraLoading(false);
+        isUsingFallbackRef.current = false;
+        localStreamRef.current = null;
+        setLocalStream(null);
 
-        // Fallback: try physical audio alone, plus non-mirrored canvas video
-        let audioTrack = null;
-        try {
-          const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          audioTrack = audioStream.getAudioTracks()[0] || null;
-        } catch {
-          audioTrack = createSilentAudioTrack();
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          setCameraPermissionState('denied');
+          setCameraError('Camera access was blocked or requires user permission.');
+        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+          setCameraPermissionState('error');
+          setCameraError('No camera detected on this device.');
+        } else {
+          setCameraPermissionState('error');
+          setCameraError(err.message || 'Unable to access camera.');
         }
 
-        const fallbackVideoTrack = createFallbackVideoTrack('You');
-        const tracks = [fallbackVideoTrack];
-        if (audioTrack) tracks.push(audioTrack);
-
-        const fallbackStream = new MediaStream(tracks);
-        localStreamRef.current = fallbackStream;
-        setLocalStream(fallbackStream);
-        setIsVideoOff(false);
-        setIsMirrored(false); // Do not mirror fallback canvas
-        return fallbackStream;
+        return null;
       } finally {
         localMediaPromiseRef.current = null;
       }
@@ -710,7 +734,10 @@ export function useWebRTC() {
     toggleSwap,
     initLocalMedia,
     requestCameraAccess: () => initLocalMedia(facingModeRef.current, true),
-    isUsingFallback: isUsingFallbackRef.current
+    isUsingFallback: isUsingFallbackRef.current,
+    isCameraLoading,
+    cameraPermissionState,
+    cameraError
   };
 }
 

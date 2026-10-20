@@ -24,18 +24,50 @@ class TurnService {
         const key = config.meteredApiKey.trim();
         let meteredServers = null;
 
-        // Try 1: Standard API Key GET
+        // Strategy 1: Check existing active credentials via v2 list API (avoids hitting 10 credential limit)
         try {
-          const resGet = await fetch(`https://${cleanDomain}.metered.live/api/v1/turn/credentials?apiKey=${key}`);
-          if (resGet.ok) {
-            const data = await resGet.json();
-            if (Array.isArray(data) && data.length > 0) {
-              meteredServers = data;
+          const resV2 = await fetch(`https://${cleanDomain}.metered.live/api/v2/turn/credentials?secretKey=${key}`);
+          if (resV2.ok) {
+            const jsonV2 = await resV2.json();
+            const activeCreds = jsonV2.data;
+            if (Array.isArray(activeCreds) && activeCreds.length > 0) {
+              const cred = activeCreds[0];
+              // If credential has an apiKey, fetch official ICE servers
+              if (cred.apiKey) {
+                try {
+                  const resServers = await fetch(`https://${cleanDomain}.metered.live/api/v1/turn/credentials?apiKey=${cred.apiKey}`);
+                  if (resServers.ok) {
+                    const serversJson = await resServers.json();
+                    if (Array.isArray(serversJson) && serversJson.length > 0) {
+                      meteredServers = serversJson;
+                    }
+                  }
+                } catch {}
+              }
+
+              // Fallback: construct standard edge relay endpoints directly
+              if (!meteredServers && cred.username && (cred.password || cred.credential)) {
+                meteredServers = [
+                  { urls: 'stun:stun.relay.metered.ca:80' },
+                  {
+                    urls: [
+                      'turn:global.relay.metered.ca:80',
+                      'turn:global.relay.metered.ca:80?transport=tcp',
+                      'turn:global.relay.metered.ca:443',
+                      'turns:global.relay.metered.ca:443?transport=tcp'
+                    ],
+                    username: cred.username,
+                    credential: cred.password || cred.credential
+                  }
+                ];
+              }
             }
           }
-        } catch {}
+        } catch (v2Err) {
+          console.warn('[TurnService] v2 list error:', v2Err.message);
+        }
 
-        // Try 2: Secret Key POST
+        // Strategy 2: If no existing credentials, create a new one via POST
         if (!meteredServers) {
           try {
             const resPost = await fetch(`https://${cleanDomain}.metered.live/api/v1/turn/credential?secretKey=${key}`, {
@@ -45,7 +77,6 @@ class TurnService {
             });
             if (resPost.ok) {
               const data = await resPost.json();
-              // If data contains an apiKey, fetch the official ICE servers array
               if (data && data.apiKey) {
                 try {
                   const resServers = await fetch(`https://${cleanDomain}.metered.live/api/v1/turn/credentials?apiKey=${data.apiKey}`);
@@ -58,7 +89,6 @@ class TurnService {
                 } catch {}
               }
 
-              // Fallback: construct using Metered's global edge relay domain directly
               if (!meteredServers && data && data.username && (data.password || data.credential)) {
                 meteredServers = [
                   { urls: 'stun:stun.relay.metered.ca:80' },
@@ -75,6 +105,21 @@ class TurnService {
                 ];
               }
             }
+          } catch (postErr) {
+            console.warn('[TurnService] POST credential error:', postErr.message);
+          }
+        }
+
+        // Strategy 3: Try standard apiKey GET
+        if (!meteredServers) {
+          try {
+            const resGet = await fetch(`https://${cleanDomain}.metered.live/api/v1/turn/credentials?apiKey=${key}`);
+            if (resGet.ok) {
+              const data = await resGet.json();
+              if (Array.isArray(data) && data.length > 0) {
+                meteredServers = data;
+              }
+            }
           } catch {}
         }
 
@@ -85,7 +130,7 @@ class TurnService {
             ...meteredServers
           ];
           this.cachedMeteredServers = fullList;
-          this.cacheExpiresAt = now + 10 * 60 * 1000; // Cache 10 minutes
+          this.cacheExpiresAt = now + 60 * 60 * 1000; // Cache 1 hour
           return {
             iceServers: fullList,
             ttl: 3600,
