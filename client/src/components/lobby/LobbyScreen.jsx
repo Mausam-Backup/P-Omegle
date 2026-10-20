@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
-import { Video, Mic, MicOff, VideoOff, Users, Plus, X, ShieldCheck, SwitchCamera } from 'lucide-react';
+import { Video, Mic, MicOff, VideoOff, Users, Plus, X, ShieldCheck, SwitchCamera, ChevronDown, ChevronUp } from 'lucide-react';
 import { DoodleCameraOff, DoodleAvatarHead } from '../doodles/DoodleCharacter';
 import { DoodleCrowdLayer } from '../doodles/DoodleCrowdLayer';
 
@@ -14,6 +14,12 @@ export function LobbyScreen({ webrtc }) {
 
   const previewVideoRef = useRef(null);
   const [tagInput, setTagInput] = useState('');
+  const [showInterests, setShowInterests] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth > 768;
+    }
+    return false;
+  });
 
   useEffect(() => {
     if (previewVideoRef.current && localStream) {
@@ -143,46 +149,71 @@ export function LobbyScreen({ webrtc }) {
             </div>
           </div>
 
-          {/* Interests section */}
+          {/* Interests section (Collapsible for compact mobile viewport) */}
           <div className="lobby-interests-group">
-            <label className="lobby-group-label">Match Interests (Optional)</label>
-            <div className="lobby-tags-container">
-              {interests.map((tag) => (
-                <span key={tag} className="lobby-tag-pill">
-                  #{tag}
-                  <button type="button" onClick={() => removeTag(tag)}>
-                    <X size={12} />
-                  </button>
+            <button
+              type="button"
+              className="lobby-interests-toggle-btn"
+              onClick={() => setShowInterests(prev => !prev)}
+              aria-expanded={showInterests}
+            >
+              <div className="interests-toggle-left">
+                <span className="lobby-group-label-text">Match Interests (Optional)</span>
+                {interests.length > 0 && (
+                  <span className="interests-count-pill">
+                    {interests.length} added
+                  </span>
+                )}
+              </div>
+              <div className="interests-toggle-right">
+                <span className="interests-toggle-hint">
+                  {showInterests ? 'Hide' : 'Add'}
                 </span>
-              ))}
+                {showInterests ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+              </div>
+            </button>
 
-              {interests.length < 5 && (
-                <input
-                  id="input-match-tag"
-                  type="text"
-                  className="lobby-tag-input"
-                  placeholder="Add interest (e.g. music)..."
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-              )}
-            </div>
+            {showInterests && (
+              <div className="lobby-interests-expanded">
+                <div className="lobby-tags-container">
+                  {interests.map((tag) => (
+                    <span key={tag} className="lobby-tag-pill">
+                      #{tag}
+                      <button type="button" onClick={() => removeTag(tag)} aria-label={`Remove ${tag}`}>
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
 
-            {/* Quick suggested chips */}
-            <div className="lobby-suggested-row">
-              <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Suggestions:</span>
-              {SUGGESTED_INTERESTS.filter(t => !interests.includes(t)).slice(0, 5).map(tag => (
-                <button
-                  key={tag}
-                  type="button"
-                  className="suggested-chip"
-                  onClick={() => addTag(tag)}
-                >
-                  + {tag}
-                </button>
-              ))}
-            </div>
+                  {interests.length < 5 && (
+                    <input
+                      id="input-match-tag"
+                      type="text"
+                      className="lobby-tag-input"
+                      placeholder="Add interest (e.g. music)..."
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                    />
+                  )}
+                </div>
+
+                {/* Quick suggested chips */}
+                <div className="lobby-suggested-row">
+                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Suggestions:</span>
+                  {SUGGESTED_INTERESTS.filter(t => !interests.includes(t)).slice(0, 5).map(tag => (
+                    <button
+                      key={tag}
+                      type="button"
+                      className="suggested-chip"
+                      onClick={() => addTag(tag)}
+                    >
+                      + {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Online count */}
