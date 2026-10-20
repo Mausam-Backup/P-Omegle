@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useChat } from '../../context/ChatContext';
 import { ActionControls } from './ActionControls';
-import { Send, Download, Sparkles, AlertCircle } from 'lucide-react';
+import { Send, Download, Sparkles, AlertCircle, Smile } from 'lucide-react';
+import { EmojiPicker } from './EmojiPicker';
 
 export function ChatBox({ onOpenReport, isFullWidth = false }) {
   const {
@@ -16,6 +17,7 @@ export function ChatBox({ onOpenReport, isFullWidth = false }) {
   } = useChat();
 
   const [inputText, setInputText] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -36,11 +38,31 @@ export function ChatBox({ onOpenReport, isFullWidth = false }) {
     sendTypingStatus(e.target.value.length > 0);
   };
 
+  const handleSelectEmoji = (emoji) => {
+    const input = inputRef.current;
+    if (input) {
+      const start = input.selectionStart ?? inputText.length;
+      const end = input.selectionEnd ?? inputText.length;
+      const nextText = inputText.slice(0, start) + emoji + inputText.slice(end);
+      setInputText(nextText);
+      sendTypingStatus(true);
+      setTimeout(() => {
+        input.focus();
+        const nextPos = start + emoji.length;
+        input.setSelectionRange(nextPos, nextPos);
+      }, 0);
+    } else {
+      setInputText((prev) => prev + emoji);
+      sendTypingStatus(true);
+    }
+  };
+
   const handleSend = (e) => {
     e.preventDefault();
     if (!inputText.trim()) return;
     sendMessage(inputText);
     setInputText('');
+    setShowEmojiPicker(false);
     sendTypingStatus(false);
   };
 
@@ -133,33 +155,54 @@ export function ChatBox({ onOpenReport, isFullWidth = false }) {
       </div>
 
       {/* Input bar and action controls */}
-      <div className="chat-input-bar">
+      <div className="chat-input-bar" style={{ position: 'relative' }}>
+        {showEmojiPicker && (
+          <EmojiPicker
+            onSelectEmoji={handleSelectEmoji}
+            onClose={() => setShowEmojiPicker(false)}
+          />
+        )}
+
         {/* Skip / Next Action Button */}
         <ActionControls onOpenReport={onOpenReport} />
 
         {/* Message Input Form */}
-        <form onSubmit={handleSend} style={{ display: 'flex', flex: 1, gap: '0.5rem' }}>
-          <input
-            ref={inputRef}
-            type="text"
-            className="chat-input-box"
-            placeholder={
-              chatStatus === 'matched'
-                ? "Type a message and press enter..."
-                : chatStatus === 'searching'
-                ? "Waiting to connect..."
-                : "Stranger disconnected. Click Skip to start new chat."
-            }
-            value={inputText}
-            disabled={chatStatus !== 'matched'}
-            onChange={handleInputChange}
-          />
+        <form onSubmit={handleSend} style={{ display: 'flex', flex: 1, gap: '0.5rem', alignItems: 'center' }}>
+          <div className="chat-drawer-input-pill" style={{ flex: 1 }}>
+            <input
+              ref={inputRef}
+              type="text"
+              className="chat-input-box"
+              style={{ flex: 1, border: 'none', background: 'transparent', padding: '0.65rem 0', outline: 'none', fontSize: '0.95rem' }}
+              placeholder={
+                chatStatus === 'matched'
+                  ? "Type a message and press enter..."
+                  : chatStatus === 'searching'
+                  ? "Waiting to connect..."
+                  : "Stranger disconnected. Click Skip to start new chat."
+              }
+              value={inputText}
+              disabled={chatStatus !== 'matched'}
+              onChange={handleInputChange}
+            />
+            {chatStatus === 'matched' && (
+              <button
+                type="button"
+                className={`drawer-emoji-toggle-btn ${showEmojiPicker ? 'active' : ''}`}
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                title="Add emoji"
+                aria-label="Add emoji"
+              >
+                <Smile size={19} />
+              </button>
+            )}
+          </div>
 
           <button
             type="submit"
             className="btn-primary"
             disabled={chatStatus !== 'matched' || !inputText.trim()}
-            style={{ padding: '0.65rem 1rem' }}
+            style={{ padding: '0.65rem 1rem', borderRadius: 24 }}
           >
             <Send size={18} />
           </button>

@@ -2,11 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useChat } from '../../context/ChatContext';
 import { X, Send, Smile, User } from 'lucide-react';
 import { DoodleAvatarHead } from '../doodles/DoodleCharacter';
+import { EmojiPicker } from './EmojiPicker';
 
 export function InCallChatDrawer() {
   const { isChatOpen, setIsChatOpen, messages, sendMessage, partner, isStrangerTyping, sendTypingStatus } = useChat();
   const [inputText, setInputText] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesContainerRef = useRef(null);
+  const inputRef = useRef(null);
 
   // Scroll only the messages container - never the document/window
   useEffect(() => {
@@ -22,12 +25,32 @@ export function InCallChatDrawer() {
     if (!inputText.trim()) return;
     sendMessage(inputText);
     setInputText('');
+    setShowEmojiPicker(false);
     sendTypingStatus(false);
   };
 
   const handleChange = (e) => {
     setInputText(e.target.value);
     sendTypingStatus(e.target.value.length > 0);
+  };
+
+  const handleSelectEmoji = (emoji) => {
+    const input = inputRef.current;
+    if (input) {
+      const start = input.selectionStart ?? inputText.length;
+      const end = input.selectionEnd ?? inputText.length;
+      const nextText = inputText.slice(0, start) + emoji + inputText.slice(end);
+      setInputText(nextText);
+      sendTypingStatus(true);
+      setTimeout(() => {
+        input.focus();
+        const nextPos = start + emoji.length;
+        input.setSelectionRange(nextPos, nextPos);
+      }, 0);
+    } else {
+      setInputText((prev) => prev + emoji);
+      sendTypingStatus(true);
+    }
   };
 
   return (
@@ -82,25 +105,47 @@ export function InCallChatDrawer() {
         )}
       </div>
 
-      {/* Input Bar */}
-      <form onSubmit={handleSend} className="chat-drawer-input-form">
-        <input
-          type="text"
-          className="drawer-input-field"
-          placeholder="Type a message..."
-          value={inputText}
-          onChange={handleChange}
-        />
-        <button
-          type="submit"
-          className="drawer-send-btn"
-          disabled={!inputText.trim()}
-          title="Send message"
-          aria-label="Send message"
-        >
-          <Send size={15} />
-        </button>
-      </form>
+      {/* Input Bar with Emoji Picker */}
+      <div className="chat-drawer-input-container">
+        {showEmojiPicker && (
+          <EmojiPicker
+            onSelectEmoji={handleSelectEmoji}
+            onClose={() => setShowEmojiPicker(false)}
+          />
+        )}
+
+        <form onSubmit={handleSend} className="chat-drawer-input-form">
+          <div className="chat-drawer-input-pill">
+            <input
+              ref={inputRef}
+              type="text"
+              className="drawer-input-field"
+              placeholder="Type a message..."
+              value={inputText}
+              onChange={handleChange}
+            />
+            <button
+              type="button"
+              className={`drawer-emoji-toggle-btn ${showEmojiPicker ? 'active' : ''}`}
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              title="Add emoji"
+              aria-label="Add emoji"
+            >
+              <Smile size={19} />
+            </button>
+          </div>
+
+          <button
+            type="submit"
+            className="drawer-send-btn"
+            disabled={!inputText.trim()}
+            title="Send message"
+            aria-label="Send message"
+          >
+            <Send size={15} />
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
