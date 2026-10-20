@@ -348,3 +348,66 @@ export function DoodleLogoIcon({ size = 34, className = '' }) {
     </svg>
   );
 }
+
+// 6. Hand-Drawn Doodle Mobile Phone Icon for PWA Installation Banner
+export function DoodleMobileAppIcon({ size = 38, className = '' }) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ width: size, height: size, flexShrink: 0 }}
+    >
+      {/* Hand-drawn soft background bubble */}
+      <path
+        d="M24 12 C14 12 10 20 10 32 L10 70 C10 82 16 88 28 88 L72 88 C84 88 90 82 90 70 L90 32 C90 20 84 12 72 12 Z"
+        fill="#f8fafc"
+        stroke="#0f172a"
+        strokeWidth="3"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+
+      {/* Main Hand-drawn Phone Body */}
+      <rect
+        x="28"
+        y="18"
+        width="44"
+        height="64"
+        rx="9"
+        fill="#ffffff"
+        stroke="#0f172a"
+        strokeWidth="3.5"
+        strokeLinejoin="round"
+      />
+
+      {/* Speaker Bar Notch on Top */}
+      <line x1="44" y1="24" x2="56" y2="24" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" />
+
+      {/* Hand-drawn Inner Screen */}
+      <rect
+        x="33"
+        y="30"
+        width="34"
+        height="40"
+        rx="4"
+        fill="#f1f5f9"
+        stroke="#0f172a"
+        strokeWidth="2.5"
+      />
+
+      {/* Cute Doodle Smiley on Screen */}
+      <circle cx="43" cy="46" r="2.5" fill="#0f172a" />
+      <path d="M53 44 Q57 41 61 44" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <path d="M45 56 Q50 61 55 56" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+
+      {/* Home Navigation Indicator Bar */}
+      <line x1="45" y1="76" x2="55" y2="76" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" />
+
+      {/* Doodle Sparkles / Star Burst on Top Right */}
+      <path d="M76 16 L80 12 M78 14 L82 14" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+

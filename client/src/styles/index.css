@@ -138,10 +138,10 @@ html, body {
 }
 
 .pro-badge-btn {
-  background: var(--pro-gradient);
+  background: #0f172a;
   color: #ffffff;
-  border: none;
-  border-radius: 20px;
+  border: 1px solid #334155;
+  border-radius: 9999px;
   padding: 0.35rem 0.95rem;
   font-size: 0.825rem;
   font-weight: 700;
@@ -149,16 +149,18 @@ html, body {
   align-items: center;
   gap: 0.35rem;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
-  transition: transform 0.15s ease;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
 .pro-badge-btn:hover {
+  background: #020617;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
 }
 
 .pro-sparkle {
-  color: #fde047;
+  color: #fbbf24;
 }
 
 .profile-avatar-btn {
@@ -1548,12 +1550,14 @@ html, body {
 }
 
 .pro-chip {
-  background: var(--pro-gradient);
-  color: #ffffff;
+  background: #0f172a;
+  color: #fbbf24;
+  border: 1px solid #334155;
   font-size: 0.68rem;
   font-weight: 800;
-  padding: 0.15rem 0.45rem;
-  border-radius: 10px;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
 }
 
 .lobby-user-sub {
@@ -1657,9 +1661,9 @@ html, body {
 
 .start-call-cta-btn {
   width: 100%;
-  background: var(--primary-gradient);
+  background: #0f172a;
   color: #ffffff;
-  border: none;
+  border: 1px solid #1e293b;
   border-radius: 14px;
   padding: 0.95rem;
   font-size: 1.05rem;
@@ -1669,13 +1673,14 @@ html, body {
   justify-content: center;
   gap: 0.6rem;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.35);
-  transition: transform 0.15s ease;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .start-call-cta-btn:hover {
+  background: #020617;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.35);
 }
 
 /* ==============================================================================
@@ -2507,34 +2512,42 @@ html, body {
 }
 
 /* ==============================================================================
-   PWA Installation Floating Prompt Banner
+   PWA Installation Floating Prompt Banner (Strictly Mobile Only)
    ============================================================================== */
-.pwa-install-banner {
-  position: fixed;
-  top: 72px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 1.5rem);
-  max-width: 480px;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid rgba(99, 102, 241, 0.25);
-  box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.16), 0 4px 12px rgba(99, 102, 241, 0.1);
-  border-radius: 18px;
-  padding: 0.75rem 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  z-index: 1000;
-  animation: pwaBannerSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+@media (min-width: 769px) {
+  .pwa-install-banner {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .pwa-install-banner {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 1.25rem);
+    max-width: 440px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 10px 28px -4px rgba(15, 23, 42, 0.14), 0 2px 8px rgba(15, 23, 42, 0.04);
+    border-radius: 18px;
+    padding: 0.65rem 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+    z-index: 1000;
+    animation: pwaBannerSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
 }
 
 @keyframes pwaBannerSlideDown {
   0% {
     opacity: 0;
-    transform: translate(-50%, -18px) scale(0.97);
+    transform: translate(-50%, -14px) scale(0.97);
   }
   100% {
     opacity: 1;
@@ -2545,21 +2558,17 @@ html, body {
 .pwa-banner-content {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.6rem;
   min-width: 0;
 }
 
-.pwa-icon-box {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  color: #ffffff;
+.pwa-doodle-icon-box {
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
 }
 
 .pwa-text-box {
@@ -2580,20 +2589,22 @@ html, body {
 }
 
 .pwa-pill-badge {
-  font-size: 0.65rem;
+  font-size: 0.625rem;
   font-weight: 700;
-  color: #4f46e5;
-  background: #ede9fe;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
   padding: 1px 6px;
   border-radius: 9999px;
   white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 
 .pwa-subtitle {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: #64748b;
   margin-top: 2px;
-  line-height: 1.25;
+  line-height: 1.2;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
@@ -2603,7 +2614,7 @@ html, body {
 .pwa-actions-row {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
   flex-shrink: 0;
 }
 
@@ -2612,20 +2623,20 @@ html, body {
   align-items: center;
   gap: 0.35rem;
   padding: 0.45rem 0.85rem;
-  background: #4f46e5;
+  background: #0f172a;
   color: #ffffff;
-  font-size: 0.78rem;
-  font-weight: 600;
-  border: none;
+  font-size: 0.775rem;
+  font-weight: 700;
+  border: 1px solid #1e293b;
   border-radius: 9999px;
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transition: transform 0.15s ease, background 0.15s ease;
   white-space: nowrap;
 }
 
 .pwa-install-btn:hover {
-  background: #4338ca;
+  background: #020617;
   transform: translateY(-1px);
 }
 
@@ -2633,8 +2644,8 @@ html, body {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: none;
-  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
   color: #64748b;
   display: flex;
   align-items: center;
@@ -2667,15 +2678,17 @@ html, body {
 }
 
 .pwa-ios-modal button {
-  background: #6366f1;
+  background: #334155;
   color: #fff;
-  border: none;
+  border: 1px solid #475569;
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.7rem;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
 }
+
 
 
 

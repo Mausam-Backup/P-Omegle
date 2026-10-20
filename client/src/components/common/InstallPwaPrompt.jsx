@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Download, X, Smartphone } from 'lucide-react';
+import { Download, X } from 'lucide-react';
+import { DoodleMobileAppIcon } from '../doodles/DoodleCharacter';
 
 export function InstallPwaPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -11,16 +12,25 @@ export function InstallPwaPrompt() {
     try {
       if (typeof window === 'undefined') return;
 
-      // Check if already running as installed standalone PWA
+      // CRITICAL: NEVER display on desktop browsers (strictly mobile only)
+      const isMobileScreen = window.innerWidth <= 768;
+      const ua = navigator.userAgent || '';
+      const isMobileDevice = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+
+      if (!isMobileScreen && !isMobileDevice) {
+        return; // Desktop: do not show
+      }
+
+      // Check if already running in standalone PWA mode
       const isStandalone =
         Boolean(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
         window.navigator.standalone === true;
 
       if (isStandalone) {
-        return; // Already in full screen app mode
+        return; // Already installed as standalone app
       }
 
-      // Check if dismissed in this session
+      // Check if user dismissed it in this session
       try {
         if (sessionStorage.getItem('omegle_pwa_dismissed') === 'true') {
           return;
@@ -28,9 +38,8 @@ export function InstallPwaPrompt() {
       } catch {}
 
       // Detect iOS device
-      const ua = navigator.userAgent || '';
-      const isIosDevice = /iPhone|iPad|iPod/.test(ua) && !window.MSStream;
-      setIsIOS(isIosDevice);
+      const isIos = /iPhone|iPad|iPod/.test(ua) && !window.MSStream;
+      setIsIOS(isIos);
 
       const handleBeforeInstallPrompt = (e) => {
         try {
@@ -42,30 +51,23 @@ export function InstallPwaPrompt() {
 
       window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-      // If mobile device, show installation prompt after 2 seconds
-      const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-      if (isMobile) {
-        const timer = setTimeout(() => {
-          try {
-            if (sessionStorage.getItem('omegle_pwa_dismissed') !== 'true') {
-              setIsVisible(true);
-            }
-          } catch {
+      // On mobile devices, prompt after 2.5s if not already dismissed
+      const mobileTimer = setTimeout(() => {
+        try {
+          if (sessionStorage.getItem('omegle_pwa_dismissed') !== 'true') {
             setIsVisible(true);
           }
-        }, 2500);
-
-        return () => {
-          clearTimeout(timer);
-          window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-        };
-      }
+        } catch {
+          setIsVisible(true);
+        }
+      }, 2500);
 
       return () => {
+        clearTimeout(mobileTimer);
         window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       };
     } catch (err) {
-      console.warn('[PWA] Hook initialization note:', err);
+      console.warn('[PWA] Mobile detection note:', err);
     }
   }, []);
 
@@ -79,7 +81,7 @@ export function InstallPwaPrompt() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        console.log('[PWA] User choice:', outcome);
+        console.log('[PWA] User response:', outcome);
         setDeferredPrompt(null);
         setIsVisible(false);
       } else {
@@ -87,7 +89,7 @@ export function InstallPwaPrompt() {
         setIsVisible(false);
       }
     } catch (err) {
-      console.warn('[PWA] Prompt error:', err);
+      console.warn('[PWA] Install prompt error:', err);
     }
   };
 
@@ -103,16 +105,16 @@ export function InstallPwaPrompt() {
   return (
     <aside className="pwa-install-banner" aria-label="Install app banner">
       <div className="pwa-banner-content">
-        <div className="pwa-icon-box">
-          <Smartphone size={20} strokeWidth={2.4} />
+        <div className="pwa-doodle-icon-box">
+          <DoodleMobileAppIcon size={38} />
         </div>
         <div className="pwa-text-box">
           <div className="pwa-title-row">
-            <strong>Install Fullscreen App</strong>
-            <span className="pwa-pill-badge">Hides Browser Bar</span>
+            <strong>Install Mobile App</strong>
+            <span className="pwa-pill-badge">Fullscreen</span>
           </div>
           <p className="pwa-subtitle">
-            Enjoy full screen view without the Chrome address bar cutting off video controls.
+            Hides Chrome header & footer for full screen video view.
           </p>
         </div>
       </div>
@@ -123,7 +125,7 @@ export function InstallPwaPrompt() {
           className="pwa-install-btn"
           onClick={handleInstallClick}
         >
-          <Download size={15} strokeWidth={2.5} />
+          <Download size={14} strokeWidth={2.5} />
           <span>Install Now</span>
         </button>
 
@@ -131,9 +133,9 @@ export function InstallPwaPrompt() {
           type="button"
           className="pwa-dismiss-btn"
           onClick={handleDismiss}
-          aria-label="Dismiss install banner"
+          aria-label="Dismiss banner"
         >
-          <X size={16} />
+          <X size={15} strokeWidth={2.5} />
         </button>
       </div>
 
