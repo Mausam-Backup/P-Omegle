@@ -41,4 +41,6 @@ export const config = {
   turnServerUrl: process.env.TURN_SERVER_URL || '',
   turnUsername: process.env.TURN_SERVER_USERNAME || '',
   turnCredential: process.env.TURN_SERVER_CREDENTIAL || '',
+  meteredDomain: process.env.METERED_DOMAIN || '',
+  meteredApiKey: process.env.METERED_API_KEY || '',
 };

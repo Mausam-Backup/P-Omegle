@@ -2,6 +2,15 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useChat } from '../context/ChatContext';
 import { api } from '../services/api';
 
+let cachedIceServers = null;
+
+// Warm-up prefetch for TURN / ICE servers on load
+api.getTurnCredentials().then((creds) => {
+  if (creds?.iceServers?.length) {
+    cachedIceServers = creds.iceServers;
+  }
+}).catch(() => {});
+
 /**
  * Creates an animated canvas video track as a graceful fallback
  * when a physical camera device is unavailable or locked by another browser tab.
@@ -250,27 +259,17 @@ export function useWebRTC() {
     setRemoteStream(remoteMediaStream);
     setIsRemoteVideoLive(false);
 
-    // 2. Comprehensive STUN & TURN relay configuration (Traverses CGNAT, different Wi-Fi, and mobile networks)
+    // 2. STUN & TURN relay configuration (Traverses NATs, different Wi-Fi, and mobile networks)
     const defaultServers = [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
       { urls: 'stun:stun2.l.google.com:19302' },
-      { urls: 'stun:global.stun.twilio.com:3478' },
-      { urls: 'stun:openrelay.metered.ca:80' },
-      {
-        urls: [
-          'turn:openrelay.metered.ca:80',
-          'turn:openrelay.metered.ca:80?transport=tcp',
-          'turn:openrelay.metered.ca:443',
-          'turns:openrelay.metered.ca:443?transport=tcp'
-        ],
-        username: 'openrelayproject',
-        credential: 'openrelayproject'
-      }
+      { urls: 'stun:stun.services.mozilla.com' },
+      { urls: 'stun:global.stun.twilio.com:3478' }
     ];
 
     const pc = new RTCPeerConnection({
-      iceServers: defaultServers,
+      iceServers: cachedIceServers || defaultServers,
       iceCandidatePoolSize: 2
     });
     peerConnectionRef.current = pc;
@@ -499,14 +498,17 @@ export function useWebRTC() {
 
     // Background fetch for TURN config if configured on backend
     api.getTurnCredentials(sessionId).then((turnConfig) => {
+      if (turnConfig?.iceServers?.length) {
+        cachedIceServers = turnConfig.iceServers;
+      }
       const hasTurn = turnConfig?.iceServers?.some(s => {
         const urls = Array.isArray(s.urls) ? s.urls : [s.urls];
-        return urls.some(u => typeof u === 'string' && u.startsWith('turn:'));
+        return urls.some(u => typeof u === 'string' && (u.startsWith('turn:') || u.startsWith('turns:')));
       });
       if (hasTurn && isMounted && peerConnectionRef.current === pc && pc.signalingState !== 'closed') {
         try {
           pc.setConfiguration({ iceServers: turnConfig.iceServers });
-          console.log('[WebRTC] TURN configuration applied');
+          console.log('[WebRTC] Active TURN configuration applied');
         } catch {}
       }
     }).catch(() => {});

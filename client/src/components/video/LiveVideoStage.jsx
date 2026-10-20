@@ -105,7 +105,7 @@ export function LiveVideoStage({ webrtc }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [chatStatus, findNextStranger, switchUser, toggleMute, toggleVideo, endCall]);
 
-  // A feed is live when remote video track is active & enabled
+  // A feed is live when WebRTC is connected & remote video track is active & enabled
   const hasRemoteVideo = Boolean(
     remoteStream &&
     remoteStream.getVideoTracks().length > 0 &&
@@ -113,6 +113,7 @@ export function LiveVideoStage({ webrtc }) {
   );
 
   const isRemoteLive = Boolean(
+    connectionState === 'connected' &&
     (hasRemoteVideo || isRemoteVideoLive) &&
     !partnerMediaState?.isVideoOff &&
     chatStatus === 'matched'
@@ -187,7 +188,7 @@ export function LiveVideoStage({ webrtc }) {
           <span>Connecting direct video feed...</span>
         </div>
       )}
-      {connectionState === 'disconnected' && chatStatus === 'matched' && (
+      {(connectionState === 'disconnected' || connectionState === 'failed') && chatStatus === 'matched' && (
         <div className="connection-toast warning">
           <AlertCircle size={14} />
           <span>Connection dropped • Reconnecting to stranger...</span>

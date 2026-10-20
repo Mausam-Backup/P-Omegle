@@ -79,15 +79,15 @@ apiRouter.delete('/me', authenticate, (req, res) => {
 // ==========================================
 // 2. TURN & WebRTC Credentials (FR-RTC-03)
 // ==========================================
-apiRouter.get('/turn-credentials', (req, res) => {
+apiRouter.get('/turn-credentials', async (req, res) => {
   const userId = req.user?.userId || req.query.userId || 'anonymous';
-  const creds = turnService.getIceCredentials(userId, req.query.sessionId);
+  const creds = await turnService.getIceCredentials(userId, req.query.sessionId);
   res.json(creds);
 });
 
 // Public fallback for guest initialization
-apiRouter.get('/public-ice-servers', (req, res) => {
-  const creds = turnService.getIceCredentials('public', null);
+apiRouter.get('/public-ice-servers', async (req, res) => {
+  const creds = await turnService.getIceCredentials('public', null);
   res.json(creds);
 });
 
