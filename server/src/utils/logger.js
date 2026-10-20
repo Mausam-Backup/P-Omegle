@@ -1,7 +1,7 @@
 /**
- * Professional GUI / Container-Based Terminal Dashboard Logger
- * Formats server events into elegant, structured ANSI container boxes
- * with aligned columns, visual status indicators, and zero text clutter.
+ * Professional CLI / Container-Based Terminal Dashboard Logger
+ * Modern left-spine cards inspired by Vite, Next.js, and Turbo CLI.
+ * 100% immune to Windows/macOS/Linux font-width discrepancies.
  */
 
 const ANSI = {
@@ -18,7 +18,7 @@ const ANSI = {
   white: '\x1b[37m'
 };
 
-const BOX_WIDTH = 68;
+const DIVIDER = '─'.repeat(46);
 
 function timestamp() {
   const d = new Date();
@@ -27,51 +27,17 @@ function timestamp() {
 }
 
 /**
- * Calculates visual display width of string in terminal, accounting for double-width emojis
+ * Renders a clean left-spine card container
  */
-function getVisualWidth(str = '') {
-  const stripped = str.replace(/\x1b\[[0-9;]*m/g, '');
-  let width = 0;
-  for (const ch of stripped) {
-    const code = ch.codePointAt(0);
-    if (
-      (code >= 0x1F300 && code <= 0x1F9FF) ||
-      (code >= 0x2600 && code <= 0x27BF) ||
-      (code >= 0x1F600 && code <= 0x1F64F) ||
-      (code >= 0x1FA00 && code <= 0x1FAFF) ||
-      code === 0x23F3 || // ⏳
-      code === 0x2728    // ✨
-    ) {
-      width += 2;
-    } else {
-      width += 1;
-    }
-  }
-  return width;
-}
-
-/**
- * Renders a structured container box with rounded borders
- */
-function drawBox({ title, tag = '', color = ANSI.cyan, lines = [] }) {
+function drawCard({ title, tag = '', color = ANSI.cyan, lines = [] }) {
   const time = timestamp();
-  const headerPrefix = ` ${tag ? tag + ' ' : ''}${title} `;
-  const timeText = ` [${time}] `;
-  const borderChar = '─';
-  const prefixWidth = getVisualWidth(headerPrefix);
-  const timeWidth = getVisualWidth(timeText);
-  const remaining = Math.max(2, BOX_WIDTH - prefixWidth - timeWidth - 2);
+  const badge = `${tag ? tag + ' ' : ''}${title}`;
 
-  const top = `${color}╭─${ANSI.bold}${headerPrefix}${ANSI.reset}${color}${borderChar.repeat(remaining)}${ANSI.dim}${timeText}${ANSI.reset}${color}╮${ANSI.reset}`;
-  const bottom = `${color}╰${borderChar.repeat(BOX_WIDTH - 2)}╯${ANSI.reset}`;
-
-  const body = lines.map(line => {
-    const rawLen = getVisualWidth(line);
-    const padCount = Math.max(0, BOX_WIDTH - 4 - rawLen);
-    return `${color}│${ANSI.reset}  ${line}${' '.repeat(padCount)}${color}│${ANSI.reset}`;
-  }).join('\n');
-
-  console.log(`${top}\n${body}\n${bottom}`);
+  console.log(`\n${color}╭─ ${ANSI.bold}${badge}${ANSI.reset} ${color}${DIVIDER}${ANSI.dim} [${time}]${ANSI.reset}`);
+  for (const line of lines) {
+    console.log(`${color}│${ANSI.reset}   ${line}`);
+  }
+  console.log(`${color}╰${DIVIDER}──────${ANSI.reset}`);
 }
 
 export function shortId(id = '') {
@@ -80,7 +46,7 @@ export function shortId(id = '') {
 
 export const log = {
   wsConnect(userId, onlineCount, ip = 'unknown') {
-    drawBox({
+    drawCard({
       title: 'CLIENT CONNECTED',
       tag: '🟢',
       color: ANSI.green,
@@ -93,7 +59,7 @@ export const log = {
 
   wsDisconnect(userId, onlineCount, reason = '') {
     const reasonText = reason ? `  •  Reason: ${reason}` : '';
-    drawBox({
+    drawCard({
       title: 'CLIENT DISCONNECTED',
       tag: '🔴',
       color: ANSI.red,
@@ -106,7 +72,7 @@ export const log = {
 
   queueJoin(userId, mode, interests = [], poolSize = 0) {
     const tagsStr = interests.length > 0 ? `[${interests.join(', ')}]` : 'any';
-    drawBox({
+    drawCard({
       title: 'USER ENQUEUED',
       tag: '⏳',
       color: ANSI.yellow,
@@ -124,7 +90,7 @@ export const log = {
 
   match(peerA, peerB, sessionId, mode, tags = []) {
     const tagsStr = tags.length ? ` • Tags: [${tags.join(', ')}]` : '';
-    drawBox({
+    drawCard({
       title: 'PAIR MATCHED',
       tag: '🎯',
       color: ANSI.cyan,
@@ -147,7 +113,7 @@ export const log = {
 
   chat(userId, text = '') {
     const preview = text.length > 45 ? text.slice(0, 45) + '...' : text;
-    drawBox({
+    drawCard({
       title: 'CHAT MESSAGE',
       tag: '💬',
       color: ANSI.magenta,
@@ -159,7 +125,7 @@ export const log = {
   },
 
   skip(userId, sessionId) {
-    drawBox({
+    drawCard({
       title: 'USER SKIPPED',
       tag: '⏭️',
       color: ANSI.yellow,
@@ -172,7 +138,7 @@ export const log = {
 
   partnerLeft(sessionId, partnerId = '') {
     const partnerText = partnerId ? `  •  Partner: ${partnerId}` : '';
-    drawBox({
+    drawCard({
       title: 'PARTNER LEFT CALL',
       tag: '⚠️',
       color: ANSI.gray,
