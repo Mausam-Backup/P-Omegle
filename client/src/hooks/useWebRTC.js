@@ -250,15 +250,29 @@ export function useWebRTC() {
     setRemoteStream(remoteMediaStream);
     setIsRemoteVideoLive(false);
 
-    // 2. STUN configuration
+    // 2. Comprehensive STUN & TURN relay configuration (Traverses CGNAT, different Wi-Fi, and mobile networks)
     const defaultServers = [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
       { urls: 'stun:stun2.l.google.com:19302' },
-      { urls: 'stun:global.stun.twilio.com:3478' }
+      { urls: 'stun:global.stun.twilio.com:3478' },
+      { urls: 'stun:openrelay.metered.ca:80' },
+      {
+        urls: [
+          'turn:openrelay.metered.ca:80',
+          'turn:openrelay.metered.ca:80?transport=tcp',
+          'turn:openrelay.metered.ca:443',
+          'turns:openrelay.metered.ca:443?transport=tcp'
+        ],
+        username: 'openrelayproject',
+        credential: 'openrelayproject'
+      }
     ];
 
-    const pc = new RTCPeerConnection({ iceServers: defaultServers });
+    const pc = new RTCPeerConnection({
+      iceServers: defaultServers,
+      iceCandidatePoolSize: 2
+    });
     peerConnectionRef.current = pc;
     pendingCandidatesRef.current = [];
 
@@ -283,6 +297,11 @@ export function useWebRTC() {
       if (!isMounted) return;
       console.log('[WebRTC] Connection state:', pc.connectionState);
       setConnectionState(pc.connectionState);
+      if (pc.connectionState === 'connected') {
+        if (remoteMediaStream.getVideoTracks().length > 0) {
+          setIsRemoteVideoLive(true);
+        }
+      }
     };
 
     pc.oniceconnectionstatechange = () => {
