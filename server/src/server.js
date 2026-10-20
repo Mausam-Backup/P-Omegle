@@ -33,6 +33,20 @@ app.use((req, res, next) => {
   next();
 });
 
+// Friendly root endpoint for browser inspection
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Omegle Next Realtime API & Matchmaking Gateway',
+    status: 'online',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      api: '/api',
+      websocket: '/ws'
+    }
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
