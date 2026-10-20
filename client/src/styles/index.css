@@ -1419,8 +1419,8 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
-  color: #ffffff;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  color: #0f172a;
   padding: 1.5rem 1.25rem 4rem;
   box-sizing: border-box;
   text-align: center;
@@ -1429,25 +1429,26 @@ html, body {
 
 .camera-loader-pulsar {
   position: relative;
-  width: 72px;
-  height: 72px;
+  width: 76px;
+  height: 76px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.95rem;
 }
 
 .camera-loader-icon {
-  color: #818cf8;
+  color: #4f46e5;
   z-index: 2;
-  filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.6));
+  filter: drop-shadow(0 2px 8px rgba(79, 70, 229, 0.25));
 }
 
 .pulse-ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 2px solid rgba(99, 102, 241, 0.5);
+  border: 2px solid rgba(99, 102, 241, 0.35);
+  background: rgba(238, 242, 255, 0.7);
   animation: pulseExpand 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
 }
 
@@ -1457,45 +1458,47 @@ html, body {
 
 @keyframes pulseExpand {
   0% {
-    transform: scale(0.6);
-    opacity: 0.9;
+    transform: scale(0.65);
+    opacity: 0.85;
   }
   100% {
-    transform: scale(1.6);
+    transform: scale(1.5);
     opacity: 0;
   }
 }
 
 .camera-status-heading {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: #f8fafc;
-  margin-bottom: 0.4rem;
-  letter-spacing: -0.01em;
+  color: #0f172a;
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.015em;
 }
 
 .camera-status-caption {
-  font-size: 0.82rem;
-  color: #94a3b8;
-  max-width: 260px;
-  line-height: 1.4;
+  font-size: 0.84rem;
+  color: #64748b;
+  max-width: 270px;
+  line-height: 1.45;
   margin-bottom: 1rem;
 }
 
 .camera-status-caption strong {
-  color: #a5b4fc;
+  color: #4338ca;
+  font-weight: 700;
 }
 
 .camera-denied-icon-badge {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
-  background: rgba(99, 102, 241, 0.12);
-  border: 1.5px solid rgba(99, 102, 241, 0.3);
+  background: #ffffff;
+  border: 2px solid #e0e7ff;
+  box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.16), 0 2px 6px rgba(15, 23, 42, 0.04);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.95rem;
 }
 
 .lobby-enable-camera-btn {
@@ -1503,12 +1506,12 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
   color: #ffffff;
   border: none;
   border-radius: 9999px;
-  padding: 0.6rem 1.25rem;
-  font-size: 0.85rem;
+  padding: 0.65rem 1.35rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
@@ -1521,11 +1524,14 @@ html, body {
 }
 
 .lobby-enable-camera-btn.secondary {
-  background: #334155;
-  box-shadow: none;
+  background: #ffffff;
+  color: #334155;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
 }
 .lobby-enable-camera-btn.secondary:hover {
-  background: #475569;
+  background: #f8fafc;
+  border-color: #94a3b8;
 }
 
 .lobby-video-placeholder {
