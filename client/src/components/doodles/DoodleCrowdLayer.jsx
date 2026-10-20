@@ -225,6 +225,12 @@ function Person({ person, onExited }) {
  * Main Crowd Layer Component
  */
 export function DoodleCrowdLayer({ className = '', style = {} }) {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth <= 768;
+    }
+    return false;
+  });
   const [persons, setPersons] = useState([]);
   const isMountedRef = useRef(true);
 
@@ -234,16 +240,30 @@ export function DoodleCrowdLayer({ className = '', style = {} }) {
     maxSpeed: 9.5
   }).current;
 
-  // Initialize dense crowd stratified across depth tiers
+  // Handle window resizing between mobile and desktop
   useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setIsMobile(window.innerWidth <= 768);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Initialize dense crowd stratified across depth tiers (desktop only)
+  useEffect(() => {
+    if (isMobile) {
+      setPersons([]);
+      return;
+    }
+
     isMountedRef.current = true;
     const width = window.innerWidth;
 
     // Density adjusted for screen width:
     // Front row has heavy coverage to guarantee zero white gap at bottom edge
-    const tierCounts = width < 640
-      ? { front: 14, mid: 12, back: 10 }
-      : width < 1024
+    const tierCounts = width < 1024
       ? { front: 20, mid: 18, back: 14 }
       : { front: 26, mid: 24, back: 20 };
 
@@ -288,6 +308,10 @@ export function DoodleCrowdLayer({ className = '', style = {} }) {
       return next;
     });
   }, [config]);
+
+  if (isMobile) {
+    return null;
+  }
 
   return (
     <div

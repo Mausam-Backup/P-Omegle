@@ -12,7 +12,7 @@ export function InstallPwaPrompt() {
     try {
       if (typeof window === 'undefined') return;
 
-      // CRITICAL: NEVER display on desktop browsers (strictly mobile only)
+      // CRITICAL: Strictly mobile only — never run on desktop
       const isMobileScreen = window.innerWidth <= 768;
       const ua = navigator.userAgent || '';
       const isMobileDevice = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
@@ -51,7 +51,7 @@ export function InstallPwaPrompt() {
 
       window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-      // On mobile devices, prompt after 2.5s if not already dismissed
+      // On mobile devices, prompt after 2s
       const mobileTimer = setTimeout(() => {
         try {
           if (sessionStorage.getItem('omegle_pwa_dismissed') !== 'true') {
@@ -60,7 +60,7 @@ export function InstallPwaPrompt() {
         } catch {
           setIsVisible(true);
         }
-      }, 2500);
+      }, 2000);
 
       return () => {
         clearTimeout(mobileTimer);
@@ -85,7 +85,7 @@ export function InstallPwaPrompt() {
         setDeferredPrompt(null);
         setIsVisible(false);
       } else {
-        alert('To install Omegle Next on your phone: Tap Chrome menu (⋮) -> tap "Install app" or "Add to Home screen".');
+        alert('To install on your phone: Tap Chrome menu (⋮) -> tap "Install app" or "Add to Home screen".');
         setIsVisible(false);
       }
     } catch (err) {
@@ -106,17 +106,9 @@ export function InstallPwaPrompt() {
     <aside className="pwa-install-banner" aria-label="Install app banner">
       <div className="pwa-banner-content">
         <div className="pwa-doodle-icon-box">
-          <DoodleMobileAppIcon size={38} />
+          <DoodleMobileAppIcon size={30} />
         </div>
-        <div className="pwa-text-box">
-          <div className="pwa-title-row">
-            <strong>Install Mobile App</strong>
-            <span className="pwa-pill-badge">Fullscreen</span>
-          </div>
-          <p className="pwa-subtitle">
-            Hides Chrome header & footer for full screen video view.
-          </p>
-        </div>
+        <strong className="pwa-clean-title">Install Mobile App</strong>
       </div>
 
       <div className="pwa-actions-row">
@@ -125,8 +117,8 @@ export function InstallPwaPrompt() {
           className="pwa-install-btn"
           onClick={handleInstallClick}
         >
-          <Download size={14} strokeWidth={2.5} />
-          <span>Install Now</span>
+          <Download size={13} strokeWidth={2.5} />
+          <span>Install</span>
         </button>
 
         <button
