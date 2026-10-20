@@ -110,53 +110,66 @@ export function ChatProvider({ children }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Connect WebSocket
+  const chatStatusRef = useRef(chatStatus);
+  chatStatusRef.current = chatStatus;
+
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+
+  const interestsRef = useRef(interests);
+  interestsRef.current = interests;
+
+  // Connect WebSocket (stable instance, never churns on state updates)
   const connectWebSocket = useCallback(() => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) return;
+    if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) return;
 
-    const token = sessionStorage.getItem('omegle_guest_token') || localStorage.getItem('omegle_access_token');
-    const defaultWsUrl = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
-      ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`
-      : 'ws://localhost:5000/ws';
-    const wsUrl = `${import.meta.env.VITE_WS_URL || defaultWsUrl}${token ? `?token=${token}` : ''}`;
+    try {
+      const token = sessionStorage.getItem('omegle_guest_token') || localStorage.getItem('omegle_access_token');
+      const defaultWsUrl = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+        ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`
+        : 'ws://localhost:5000/ws';
+      const wsUrl = `${import.meta.env.VITE_WS_URL || defaultWsUrl}${token ? `?token=${token}` : ''}`;
 
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
 
-    ws.onopen = () => {
-      console.log('[WS] Connected to Live Video Gateway');
-      // If client was searching when socket disconnected, immediately re-enqueue
-      if (chatStatus === 'searching') {
-        ws.send(JSON.stringify({
-          action: 'join_queue',
-          payload: {
-            mode,
-            interests,
-            language: navigator.language || 'en'
-          }
-        }));
-      }
-    };
+      ws.onopen = () => {
+        console.log('[WS] Connected to Live Video Gateway');
+        // If client was searching when socket disconnected, immediately re-enqueue
+        if (chatStatusRef.current === 'searching') {
+          ws.send(JSON.stringify({
+            action: 'join_queue',
+            payload: {
+              mode: modeRef.current,
+              interests: interestsRef.current,
+              language: navigator.language || 'en'
+            }
+          }));
+        }
+      };
 
-    ws.onmessage = (event) => {
-      try {
-        const { event: evtName, data } = JSON.parse(event.data);
-        // Always invoke the latest handler via ref — avoids stale closure bug
-        handleSocketEventRef.current?.(evtName, data);
-      } catch (err) {
-        console.error('[WS] Error parsing message', err);
-      }
-    };
+      ws.onmessage = (event) => {
+        try {
+          const { event: evtName, data } = JSON.parse(event.data);
+          handleSocketEventRef.current?.(evtName, data);
+        } catch (err) {
+          console.error('[WS] Error parsing message', err);
+        }
+      };
 
-    ws.onclose = () => {
-      console.log('[WS] Socket disconnected, scheduling reconnect...');
-      reconnectTimeoutRef.current = setTimeout(connectWebSocket, 2000);
-    };
+      ws.onclose = () => {
+        console.log('[WS] Socket disconnected, scheduling reconnect...');
+        if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = setTimeout(connectWebSocket, 2500);
+      };
 
-    ws.onerror = (err) => {
-      console.error('[WS] Socket error', err);
-    };
-  }, [chatStatus, mode, interests]);
+      ws.onerror = (err) => {
+        console.error('[WS] Socket error', err);
+      };
+    } catch (err) {
+      console.warn('[WS] Connect error:', err);
+    }
+  }, []);
 
   useEffect(() => {
     connectWebSocket();

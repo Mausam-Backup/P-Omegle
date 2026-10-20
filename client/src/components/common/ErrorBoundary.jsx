@@ -45,11 +45,31 @@ export class ErrorBoundary extends React.Component {
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.75rem' }}>
               Something went wrong
             </h2>
-            <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-              The application encountered an unexpected issue. Click below to return to the lobby.
+            <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1rem', lineHeight: 1.5 }}>
+              The application encountered an unexpected issue:
             </p>
+            {this.state.error && (
+              <pre style={{
+                background: '#fee2e2',
+                color: '#991b1b',
+                padding: '0.75rem 1rem',
+                borderRadius: '8px',
+                fontSize: '0.8rem',
+                textAlign: 'left',
+                overflowX: 'auto',
+                marginBottom: '1.25rem',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word'
+              }}>
+                {this.state.error.toString()}
+                {this.state.error.stack ? `\n\n${this.state.error.stack}` : ''}
+              </pre>
+            )}
             <button
-              onClick={this.handleReload}
+              onClick={() => {
+                sessionStorage.clear();
+                window.location.reload();
+              }}
               style={{
                 background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
                 color: '#ffffff',

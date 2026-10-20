@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, X, Smartphone, Sparkles } from 'lucide-react';
+import { Download, X, Smartphone } from 'lucide-react';
 
 export function InstallPwaPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -8,67 +8,94 @@ export function InstallPwaPrompt() {
   const [showIOSGuide, setShowIOSGuide] = useState(false);
 
   useEffect(() => {
-    // Check if already running as installed standalone PWA
-    const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      window.navigator.standalone === true;
+    try {
+      if (typeof window === 'undefined') return;
 
-    if (isStandalone) {
-      return; // Already in full screen app mode!
+      // Check if already running as installed standalone PWA
+      const isStandalone =
+        Boolean(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+        window.navigator.standalone === true;
+
+      if (isStandalone) {
+        return; // Already in full screen app mode
+      }
+
+      // Check if dismissed in this session
+      try {
+        if (sessionStorage.getItem('omegle_pwa_dismissed') === 'true') {
+          return;
+        }
+      } catch {}
+
+      // Detect iOS device
+      const ua = navigator.userAgent || '';
+      const isIosDevice = /iPhone|iPad|iPod/.test(ua) && !window.MSStream;
+      setIsIOS(isIosDevice);
+
+      const handleBeforeInstallPrompt = (e) => {
+        try {
+          e.preventDefault();
+          setDeferredPrompt(e);
+          setIsVisible(true);
+        } catch {}
+      };
+
+      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+      // If mobile device, show installation prompt after 2 seconds
+      const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+      if (isMobile) {
+        const timer = setTimeout(() => {
+          try {
+            if (sessionStorage.getItem('omegle_pwa_dismissed') !== 'true') {
+              setIsVisible(true);
+            }
+          } catch {
+            setIsVisible(true);
+          }
+        }, 2500);
+
+        return () => {
+          clearTimeout(timer);
+          window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        };
+      }
+
+      return () => {
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      };
+    } catch (err) {
+      console.warn('[PWA] Hook initialization note:', err);
     }
-
-    // Check if dismissed in this session
-    const isDismissed = sessionStorage.getItem('omegle_pwa_dismissed') === 'true';
-    if (isDismissed) {
-      return;
-    }
-
-    // Detect iOS
-    const isIosDevice = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
-    setIsIOS(isIosDevice);
-
-    const handleBeforeInstallPrompt = (e) => {
-      // Prevent automatic mini-infobar on Chrome Mobile
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setIsVisible(true);
-      console.log('[PWA] beforeinstallprompt captured, install prompt ready');
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // If on iOS and not standalone, show prompt after a short delay
-    if (isIosDevice) {
-      const timer = setTimeout(() => {
-        setIsVisible(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
   }, []);
 
   const handleInstallClick = async () => {
-    if (isIOS) {
-      setShowIOSGuide(true);
-      return;
+    try {
+      if (isIOS) {
+        setShowIOSGuide(true);
+        return;
+      }
+
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log('[PWA] User choice:', outcome);
+        setDeferredPrompt(null);
+        setIsVisible(false);
+      } else {
+        alert('To install Omegle Next on your phone: Tap Chrome menu (⋮) -> tap "Install app" or "Add to Home screen".');
+        setIsVisible(false);
+      }
+    } catch (err) {
+      console.warn('[PWA] Prompt error:', err);
     }
-
-    if (!deferredPrompt) return;
-
-    // Show the native Chrome installation prompt
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log('[PWA] User response to install prompt:', outcome);
-    setDeferredPrompt(null);
-    setIsVisible(false);
   };
 
   const handleDismiss = () => {
     setIsVisible(false);
-    sessionStorage.setItem('omegle_pwa_dismissed', 'true');
+    try {
+      sessionStorage.setItem('omegle_pwa_dismissed', 'true');
+    } catch {}
   };
 
   if (!isVisible) return null;
@@ -85,7 +112,7 @@ export function InstallPwaPrompt() {
             <span className="pwa-pill-badge">Hides Browser Bar</span>
           </div>
           <p className="pwa-subtitle">
-            Get the full screen mobile experience without the Chrome URL bar cutting off video controls.
+            Enjoy full screen view without the Chrome address bar cutting off video controls.
           </p>
         </div>
       </div>
@@ -113,7 +140,7 @@ export function InstallPwaPrompt() {
       {showIOSGuide && (
         <div className="pwa-ios-modal">
           <p>
-            To install on iPhone/iPad: tap the <strong>Share</strong> button <span style={{ fontSize: '1.1rem' }}>⎋</span> at the bottom of Safari, then choose <strong>"Add to Home Screen"</strong>.
+            Tap <strong>Share ⎋</strong> at bottom of Safari, then choose <strong>"Add to Home Screen"</strong>.
           </p>
           <button type="button" onClick={() => setShowIOSGuide(false)}>Got it</button>
         </div>
