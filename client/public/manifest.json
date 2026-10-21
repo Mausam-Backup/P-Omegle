@@ -1,14 +1,14 @@
 {
-  "short_name": "Omegle Next",
-  "name": "Omegle Next — Live Random Video & Text Chat",
+  "short_name": "O P Omegle",
+  "name": "O P Omegle — Live Random Video & Text Chat",
   "description": "Connect instantly with verified strangers in 1-on-1 random video and text chat.",
   "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0f172a",
-  "theme_color": "#4f46e5",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "icons": [
     {
       "src": "/favicon.svg",
