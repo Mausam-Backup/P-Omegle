@@ -394,17 +394,19 @@ export function LiveVideoStage({ webrtc }) {
               <div className="doodle-searching-box">
                 <DoodleSearching className="doodle-graphic searching-animated" />
                 <div className="doodle-caption-box">
-                  <span className="clean-spinner"></span>
-                  <span className="doodle-status-text">
-                    Finding your next match
-                    <span className="searching-dots">
-                      <span>.</span><span>.</span><span>.</span>
+                  <div className="doodle-status-row">
+                    <span className="clean-spinner"></span>
+                    <span className="doodle-status-text">
+                      Finding your next match
+                      <span className="searching-dots">
+                        <span>.</span><span>.</span><span>.</span>
+                      </span>
                     </span>
-                  </span>
-                  <span className="search-elapsed-badge">{searchDuration}s</span>
+                    <span className="search-elapsed-badge">{searchDuration}s</span>
+                  </div>
                 </div>
                 {interests.length > 0 && searchDuration >= 5 && (
-                  <div className="search-tags-hint">
+                  <div className="search-tags-hint" title={`Looking for tags: #${interests.join(', #')}`}>
                     Looking for tags: <strong>#{interests.join(', #')}</strong>
                   </div>
                 )}
