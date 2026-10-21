@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { X, User, Check, LogOut } from 'lucide-react';
 import { DoodleAvatarHead } from '../doodles/DoodleCharacter';
@@ -10,6 +10,13 @@ export function UserProfileModal() {
   const [name, setName] = useState(user?.displayName || 'You');
   const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || 'you');
   const [savedMessage, setSavedMessage] = useState(false);
+
+  useEffect(() => {
+    if (user && isProfileModalOpen) {
+      setName(user.displayName || 'You');
+      setSelectedAvatar(user.avatar || 'you');
+    }
+  }, [user, isProfileModalOpen]);
 
   if (!isProfileModalOpen) return null;
 

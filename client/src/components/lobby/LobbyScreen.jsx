@@ -116,10 +116,8 @@ export function LobbyScreen({ webrtc }) {
               />
             ) : isCameraLoading ? (
               <div className="lobby-camera-loading-state">
-                <div className="camera-loader-pulsar">
-                  <Video size={36} className="camera-loader-icon" />
-                  <div className="pulse-ring pulse-1" />
-                  <div className="pulse-ring pulse-2" />
+                <div className="camera-loader-doodle-badge">
+                  <Video size={28} color="#0f172a" />
                 </div>
                 <div className="camera-status-heading">Starting Camera...</div>
                 <div className="camera-status-caption">
@@ -147,7 +145,7 @@ export function LobbyScreen({ webrtc }) {
               /* State: Denied, Prompt, or Waiting for User Gesture in Incognito */
               <div className="lobby-camera-denied-state">
                 <div className="camera-denied-icon-badge">
-                  <Video size={34} color="#6366f1" />
+                  <Video size={28} color="#0f172a" />
                 </div>
                 <div className="camera-status-heading">Camera Access Required</div>
                 <div className="camera-status-caption">

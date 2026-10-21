@@ -35,10 +35,14 @@ export function LiveVideoStage({ webrtc }) {
     partnerMediaState,
     findNextStranger,
     clearInterestsAndSearch,
-    interests
+    interests,
+    incomingMessageBanner,
+    setIncomingMessageBanner,
+    setIsChatOpen,
+    isChatOpen
   } = useChat();
 
-  const { setIsSettingsModalOpen } = useAuth();
+  const { user, setIsSettingsModalOpen } = useAuth();
   const {
     localStream,
     remoteStream,
@@ -79,6 +83,16 @@ export function LiveVideoStage({ webrtc }) {
     }
     return () => clearInterval(timer);
   }, [chatStatus, isAutoSearchPaused, findNextStranger]);
+
+  // Auto-dismiss incoming message notification toast
+  useEffect(() => {
+    if (incomingMessageBanner) {
+      const timer = setTimeout(() => {
+        setIncomingMessageBanner(null);
+      }, 5500);
+      return () => clearTimeout(timer);
+    }
+  }, [incomingMessageBanner, setIncomingMessageBanner]);
 
   // Global Keyboard shortcuts: Space (skip/find next), M (mute), V (video), Esc (end)
   useEffect(() => {
@@ -192,6 +206,49 @@ export function LiveVideoStage({ webrtc }) {
         <div className="connection-toast warning">
           <AlertCircle size={14} />
           <span>Connection dropped • Reconnecting to stranger...</span>
+        </div>
+      )}
+
+      {/* Incoming Message Notification Banner Pop-Up */}
+      {incomingMessageBanner && !isChatOpen && (
+        <div
+          className="incoming-message-toast"
+          onClick={() => {
+            setIsChatOpen(true);
+            setIncomingMessageBanner(null);
+          }}
+          role="status"
+          aria-live="polite"
+        >
+          <div className="toast-left">
+            <div className="toast-avatar-wrapper">
+              <DoodleAvatarHead seed="stranger" size={28} />
+              <span className="toast-green-dot" />
+            </div>
+            <div className="toast-text-block">
+              <div className="toast-header-text">
+                <span className="toast-sender-name">{incomingMessageBanner.sender}</span>
+                <span className="toast-tag-note">New Message</span>
+              </div>
+              <div className="toast-message-body">
+                {incomingMessageBanner.text}
+              </div>
+            </div>
+          </div>
+          <div className="toast-right">
+            <span className="toast-reply-badge">Reply</span>
+            <button
+              type="button"
+              className="toast-dismiss-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIncomingMessageBanner(null);
+              }}
+              aria-label="Dismiss message notification"
+            >
+              <X size={14} />
+            </button>
+          </div>
         </div>
       )}
 
@@ -426,7 +483,7 @@ export function LiveVideoStage({ webrtc }) {
 
           {/* Bottom-left pill badge: Doodle Avatar + You */}
           <div className="video-author-badge">
-            <DoodleAvatarHead seed="you" size={22} />
+            <DoodleAvatarHead seed={user?.avatar || 'you'} size={22} />
             <span className="badge-name-text">You</span>
           </div>
         </div>

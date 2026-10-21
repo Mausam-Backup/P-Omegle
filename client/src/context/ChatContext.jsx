@@ -34,6 +34,12 @@ export function ChatProvider({ children }) {
 
   // Chat drawer visibility
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const isChatOpenRef = useRef(isChatOpen);
+  isChatOpenRef.current = isChatOpen;
+
+  // Unread chat messages & incoming notification banner
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [incomingMessageBanner, setIncomingMessageBanner] = useState(null);
 
   // Messages
   const [messages, setMessages] = useState([]);
@@ -235,6 +241,9 @@ export function ChatProvider({ children }) {
         setPeerRole(data.role);
         setSharedInterests(data.sharedInterests || []);
         setPartnerId(data.partnerId);
+        setMessages([]);
+        setUnreadCount(0);
+        setIncomingMessageBanner(null);
         if (data.iceServers && Array.isArray(data.iceServers) && data.iceServers.length > 0) {
           setIceServers(data.iceServers);
         }
@@ -291,16 +300,26 @@ export function ChatProvider({ children }) {
         setIsStrangerTyping(false);
         const now = new Date();
         const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const msgText = data.payload?.text || '';
         setMessages(prev => [
           ...prev,
           {
             id: 'msg_' + Date.now(),
             sender: 'stranger',
-            text: data.payload?.text || '',
+            text: msgText,
             time: timeStr,
             author: partner.name
           }
         ]);
+
+        if (!isChatOpenRef.current) {
+          setUnreadCount(prev => prev + 1);
+          setIncomingMessageBanner({
+            id: Date.now(),
+            text: msgText,
+            sender: partner.name || 'Stranger'
+          });
+        }
         break;
       }
 
@@ -518,7 +537,17 @@ export function ChatProvider({ children }) {
         clearInterestsAndSearch,
         isLive,
         isChatOpen,
-        setIsChatOpen,
+        setIsChatOpen: (open) => {
+          setIsChatOpen(open);
+          if (open) {
+            setUnreadCount(0);
+            setIncomingMessageBanner(null);
+          }
+        },
+        unreadCount,
+        setUnreadCount,
+        incomingMessageBanner,
+        setIncomingMessageBanner,
         messages,
         isStrangerTyping,
         stats,
