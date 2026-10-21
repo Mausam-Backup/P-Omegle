@@ -3,18 +3,26 @@ import { useAuth } from '../../context/AuthContext';
 import { X, User, Check, LogOut } from 'lucide-react';
 import { DoodleAvatarHead } from '../doodles/DoodleCharacter';
 
-const DOODLE_PRESETS = ['you', 'stranger', 'self', 'peep-1', 'peep-2'];
+const DOODLE_PRESETS = ['beanie', 'glasses', 'cap', 'afro', 'headphones'];
+
+function normalizeAvatarSeed(seed) {
+  if (!seed || seed === 'you' || seed === 'self') return 'beanie';
+  if (seed === 'stranger') return 'glasses';
+  if (seed === 'peep-1') return 'cap';
+  if (seed === 'peep-2') return 'afro';
+  return DOODLE_PRESETS.includes(seed) ? seed : 'beanie';
+}
 
 export function UserProfileModal() {
   const { user, isProfileModalOpen, setIsProfileModalOpen, updateProfile, logout } = useAuth();
   const [name, setName] = useState(user?.displayName || 'You');
-  const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || 'you');
+  const [selectedAvatar, setSelectedAvatar] = useState(normalizeAvatarSeed(user?.avatar));
   const [savedMessage, setSavedMessage] = useState(false);
 
   useEffect(() => {
     if (user && isProfileModalOpen) {
       setName(user.displayName || 'You');
-      setSelectedAvatar(user.avatar || 'you');
+      setSelectedAvatar(normalizeAvatarSeed(user.avatar));
     }
   }, [user, isProfileModalOpen]);
 
@@ -22,12 +30,13 @@ export function UserProfileModal() {
 
   const handleSave = (e) => {
     e.preventDefault();
-    updateProfile({ displayName: name, avatar: selectedAvatar });
+    const cleanName = name.trim() || 'You';
+    updateProfile({ displayName: cleanName, avatar: selectedAvatar });
     setSavedMessage(true);
     setTimeout(() => {
       setSavedMessage(false);
       setIsProfileModalOpen(false);
-    }, 900);
+    }, 450);
   };
 
   return (

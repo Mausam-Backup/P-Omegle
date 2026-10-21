@@ -2091,14 +2091,38 @@ html, body {
   justify-content: space-between;
   gap: 1.25rem;
   background: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle Blurred Doodle Background Texture for Settings Section */
+.lobby-settings-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/chat-doodle-bg.jpg');
+  background-size: 240px 240px;
+  background-repeat: repeat;
+  opacity: 0.12;
+  filter: blur(0.4px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.lobby-settings-section > * {
+  position: relative;
+  z-index: 1;
 }
 
 .lobby-user-header {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid #f1f5f9;
+  padding: 0.85rem 1.15rem;
+  background: #ffffff;
+  border: 1.5px solid #0f172a;
+  border-radius: 16px;
+  box-shadow: 2px 2px 0px #0f172a;
 }
 
 .lobby-user-avatar {
@@ -2146,10 +2170,12 @@ html, body {
   text-decoration-thickness: 1px;
   cursor: pointer;
   padding: 0;
+  transition: opacity 0.15s ease;
 }
 
 .link-btn:hover {
-  color: #6366f1;
+  color: #0f172a;
+  opacity: 0.7;
 }
 
 .lobby-interests-group {
@@ -2161,20 +2187,21 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 0.55rem 0.9rem;
+  background: #ffffff;
+  border: 1.5px solid #0f172a;
+  border-radius: 14px;
+  box-shadow: 2px 2px 0px #0f172a;
+  padding: 0.65rem 1rem;
   font-family: inherit;
   cursor: pointer;
   color: #0f172a;
   transition: all 0.15s ease;
-  box-shadow: none;
 }
 
 .lobby-interests-toggle-btn:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: #f8fafc;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #0f172a;
 }
 
 .interests-toggle-left {
@@ -2190,13 +2217,13 @@ html, body {
 }
 
 .interests-count-pill {
-  background: #ede9fe;
-  color: #6366f1;
+  background: #0f172a;
+  color: #ffffff;
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 1px 7px;
+  padding: 2px 8px;
   border-radius: 9999px;
-  border: 1px solid #c7d2fe;
+  border: 1px solid #0f172a;
 }
 
 .interests-toggle-right {
@@ -2222,41 +2249,48 @@ html, body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1.5px solid #0f172a;
+  border-radius: 14px;
+  box-shadow: 2px 2px 0px #0f172a;
   padding: 0.65rem;
   align-items: center;
-  box-shadow: none;
 }
 
 .lobby-tag-pill {
-  background: #e0e7ff;
-  color: #3730a3;
-  border: 1px solid #c7d2fe;
-  box-shadow: none;
-  padding: 0.28rem 0.7rem;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1.5px solid #0f172a;
+  box-shadow: 1.5px 1.5px 0px #0f172a;
+  padding: 0.3rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: 700;
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.lobby-tag-pill:hover {
+  background: #f8fafc;
 }
 
 .lobby-tag-pill button {
   background: none;
   border: none;
-  color: #4338ca;
+  color: #0f172a;
   cursor: pointer;
   display: flex;
   align-items: center;
-  opacity: 0.75;
-  transition: opacity 0.15s ease;
+  opacity: 0.65;
+  padding: 0;
+  transition: all 0.15s ease;
 }
 
 .lobby-tag-pill button:hover {
   opacity: 1;
+  color: #ef4444;
 }
 
 .lobby-tag-input {
@@ -2280,26 +2314,27 @@ html, body {
 }
 
 .suggested-chip {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  box-shadow: none;
+  background: #ffffff;
+  border: 1.5px solid #0f172a;
+  box-shadow: 1.5px 1.5px 0px #0f172a;
   border-radius: 9999px;
-  padding: 0.24rem 0.7rem;
+  padding: 0.28rem 0.75rem;
   font-size: 0.75rem;
-  font-weight: 600;
-  color: #475569;
+  font-weight: 700;
+  color: #0f172a;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .suggested-chip:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-  border-color: #cbd5e1;
+  background: #f8fafc;
+  transform: translate(-1px, -1px);
+  box-shadow: 2.5px 2.5px 0px #0f172a;
 }
 
 .suggested-chip:active {
-  transform: scale(0.97);
+  transform: translate(1px, 1px);
+  box-shadow: 0.5px 0.5px 0px #0f172a;
 }
 
 .lobby-stats-row {
@@ -2307,19 +2342,20 @@ html, body {
   align-items: center;
   gap: 0.55rem;
   font-size: 0.85rem;
-  font-weight: 500;
-  color: #475569;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 0.55rem 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+  background: #ffffff;
+  border: 1.5px solid #0f172a;
+  border-radius: 14px;
+  box-shadow: 2px 2px 0px #0f172a;
+  padding: 0.65rem 1rem;
 }
 
 .start-call-cta-btn {
   width: 100%;
   background: #0f172a;
   color: #ffffff;
-  border: none;
+  border: 2px solid #0f172a;
   border-radius: 14px;
   padding: 1rem 1.5rem;
   font-size: 1.05rem;
@@ -2329,7 +2365,7 @@ html, body {
   justify-content: center;
   gap: 0.65rem;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2);
+  box-shadow: 3px 3px 0px #0f172a;
   letter-spacing: -0.01em;
   font-family: inherit;
   transition: all 0.15s ease;
@@ -2337,12 +2373,13 @@ html, body {
 
 .start-call-cta-btn:hover {
   background: #020617;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.3);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #0f172a;
 }
 
 .start-call-cta-btn:active {
-  transform: translateY(0);
+  transform: translate(1px, 1px);
+  box-shadow: 1.5px 1.5px 0px #0f172a;
 }
 
 /* ==============================================================================
@@ -2363,13 +2400,32 @@ html, body {
 .modal-card {
   width: 100%;
   max-width: 460px;
-  background: var(--bg-card);
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  border: 2px solid #0f172a;
   border-radius: 20px;
   padding: 1.75rem;
-  box-shadow: 0 20px 48px -12px rgba(15, 23, 42, 0.16), 0 1px 3px rgba(15, 23, 42, 0.06);
+  box-shadow: 4px 4px 0px #0f172a;
   position: relative;
+  overflow: hidden;
   animation: modal-pop 0.2s ease-out;
+}
+
+.modal-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/chat-doodle-bg.jpg');
+  background-size: 240px 240px;
+  background-repeat: repeat;
+  opacity: 0.10;
+  filter: blur(0.4px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.modal-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes modal-pop {
@@ -2496,8 +2552,8 @@ html, body {
 
 .field-input {
   background: #ffffff;
-  border: 1px solid #cbd5e1;
-  box-shadow: none;
+  border: 1.5px solid #0f172a;
+  box-shadow: 1.5px 1.5px 0px #0f172a;
   border-radius: 12px;
   padding: 0.75rem 1rem;
   font-family: inherit;
@@ -2510,7 +2566,7 @@ html, body {
 
 .field-input:focus {
   border-color: #0f172a;
-  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+  box-shadow: 2.5px 2.5px 0px #0f172a;
 }
 
 .modal-actions-row {
@@ -2521,14 +2577,14 @@ html, body {
 }
 
 .secondary-btn {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  box-shadow: none;
+  background: #ffffff;
+  border: 1.5px solid #0f172a;
+  box-shadow: 1.5px 1.5px 0px #0f172a;
   border-radius: 12px;
   padding: 0.75rem 1.25rem;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #475569;
+  color: #0f172a;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2538,20 +2594,27 @@ html, body {
 
 .secondary-btn:hover {
   background: #fee2e2;
-  border-color: #fca5a5;
+  border-color: #0f172a;
   color: #dc2626;
+  transform: translate(-1px, -1px);
+  box-shadow: 2.5px 2.5px 0px #0f172a;
+}
+
+.secondary-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 0.5px 0.5px 0px #0f172a;
 }
 
 .primary-submit-btn {
   background: #0f172a;
   color: #ffffff;
-  border: none;
+  border: 2px solid #0f172a;
   border-radius: 12px;
   padding: 0.75rem 1.5rem;
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+  box-shadow: 3px 3px 0px #0f172a;
   font-family: inherit;
   letter-spacing: -0.01em;
   transition: all 0.15s ease;
@@ -2559,12 +2622,13 @@ html, body {
 
 .primary-submit-btn:hover {
   background: #020617;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.28);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #0f172a;
 }
 
 .primary-submit-btn:active {
-  transform: translateY(0);
+  transform: translate(1px, 1px);
+  box-shadow: 1.5px 1.5px 0px #0f172a;
 }
 
 /* Pro Modal Doodle Neo-Brutalist Theme */

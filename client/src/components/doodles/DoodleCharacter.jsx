@@ -231,10 +231,15 @@ export function DoodleSearching({ className = '', style = {} }) {
   );
 }
 
-// 4. Compact B&W Avatar Heads for pill badges & profile selection
-export function DoodleAvatarHead({ seed = 'stranger', size = 26, className = '', style = {} }) {
-  const isSelf = seed === 'you' || seed === 'self';
-  
+// 4. Compact B&W Avatar Heads for pill badges & profile selection (5 distinct styles)
+export function DoodleAvatarHead({ seed = 'beanie', size = 26, className = '', style = {} }) {
+  // Normalize seed
+  let variant = seed || 'beanie';
+  if (variant === 'you' || variant === 'self') variant = 'beanie';
+  if (variant === 'stranger') variant = 'glasses';
+  if (variant === 'peep-1') variant = 'cap';
+  if (variant === 'peep-2') variant = 'afro';
+
   return (
     <svg
       viewBox="0 0 100 100"
@@ -254,35 +259,112 @@ export function DoodleAvatarHead({ seed = 'stranger', size = 26, className = '',
         ...style
       }}
     >
-      {/* Head */}
+      {/* Base Face Circle */}
       <circle cx="50" cy="50" r="48" fill="#ffffff" />
 
-      {isSelf ? (
-        // Self: Beanie & chill eyes
+      {/* Variant 1: Beanie (Chill Smiling Face) */}
+      {variant === 'beanie' && (
         <>
           <path d="M20 45 C20 18 80 18 80 45 Z" fill="#0f172a" />
           <rect x="18" y="42" width="64" height="12" rx="4" fill="#ffffff" stroke="#0f172a" strokeWidth="3" />
-          {/* Eyes */}
-          <path d="M36 62 Q41 58 46 62" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" fill="none" />
-          <path d="M54 62 Q59 58 64 62" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" fill="none" />
-          {/* Smile */}
-          <path d="M44 76 Q50 82 56 76" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+          <line x1="38" y1="44" x2="38" y2="52" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" />
+          <line x1="50" y1="44" x2="50" y2="52" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" />
+          <line x1="62" y1="44" x2="62" y2="52" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" />
+          {/* Relaxed curved eyes */}
+          <path d="M34 63 Q40 58 46 63" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" fill="none" />
+          <path d="M54 63 Q60 58 66 63" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" fill="none" />
+          {/* Nose dot */}
+          <circle cx="50" cy="69" r="1.5" fill="#0f172a" />
+          {/* Sweet Smile */}
+          <path d="M42 77 Q50 84 58 77" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" fill="none" />
         </>
-      ) : (
-        // Stranger: Glasses & curly hair
+      )}
+
+      {/* Variant 2: Glasses (Curly hair + nerd chic spectacles) */}
+      {variant === 'glasses' && (
         <>
           <path d="M22 40 C20 20 80 20 78 40 C72 28 28 28 22 40 Z" fill="#0f172a" />
           <circle cx="28" cy="26" r="8" fill="#0f172a" />
           <circle cx="50" cy="20" r="10" fill="#0f172a" />
           <circle cx="72" cy="26" r="8" fill="#0f172a" />
           {/* Glasses */}
-          <rect x="28" y="46" width="18" height="15" rx="4" fill="#ffffff" stroke="#0f172a" strokeWidth="2.5" />
-          <rect x="54" y="46" width="18" height="15" rx="4" fill="#ffffff" stroke="#0f172a" strokeWidth="2.5" />
-          <line x1="46" y1="53" x2="54" y2="53" stroke="#0f172a" strokeWidth="2.5" />
-          <circle cx="37" cy="53" r="2.5" fill="#0f172a" />
-          <circle cx="63" cy="53" r="2.5" fill="#0f172a" />
+          <rect x="27" y="46" width="19" height="16" rx="4" fill="#ffffff" stroke="#0f172a" strokeWidth="2.5" />
+          <rect x="54" y="46" width="19" height="16" rx="4" fill="#ffffff" stroke="#0f172a" strokeWidth="2.5" />
+          <line x1="46" y1="54" x2="54" y2="54" stroke="#0f172a" strokeWidth="2.5" />
+          <circle cx="36.5" cy="54" r="2.5" fill="#0f172a" />
+          <circle cx="63.5" cy="54" r="2.5" fill="#0f172a" />
+          {/* Nose */}
+          <path d="M50 64 L48 68 L52 68" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" />
           {/* Smile */}
-          <path d="M43 74 Q50 80 57 74" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+          <path d="M43 76 Q50 82 57 76" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        </>
+      )}
+
+      {/* Variant 3: Cap (Backwards Snapback Cap + Cheerful Eyes) */}
+      {variant === 'cap' && (
+        <>
+          {/* Cap dome */}
+          <path d="M22 46 C22 24 78 24 78 46 Z" fill="#0f172a" />
+          {/* Visor turned backward/sideways */}
+          <path d="M68 40 C86 38 92 48 84 54 C78 52 74 48 70 44 Z" fill="#0f172a" />
+          {/* Front sweatband */}
+          <path d="M22 46 Q50 42 78 46 L78 50 Q50 46 22 50 Z" fill="#ffffff" stroke="#0f172a" strokeWidth="2.5" />
+          {/* Hair tufts on sides */}
+          <path d="M19 50 Q16 60 21 64" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" />
+          {/* Big bright open eyes */}
+          <circle cx="36" cy="62" r="3.5" fill="#0f172a" />
+          <circle cx="64" cy="62" r="3.5" fill="#0f172a" />
+          {/* Cute eyebrows */}
+          <path d="M31 55 Q36 52 41 55" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" />
+          <path d="M59 55 Q64 52 69 55" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" />
+          {/* Happy Open Smile */}
+          <path d="M40 73 Q50 85 60 73 Z" fill="#0f172a" />
+          <path d="M45 77 Q50 80 55 77" fill="#ffffff" />
+        </>
+      )}
+
+      {/* Variant 4: Afro (Big Fluffy Hair + Wink) */}
+      {variant === 'afro' && (
+        <>
+          {/* Big Fluffy Afro silhouette */}
+          <circle cx="28" cy="36" r="14" fill="#0f172a" />
+          <circle cx="50" cy="24" r="16" fill="#0f172a" />
+          <circle cx="72" cy="36" r="14" fill="#0f172a" />
+          <circle cx="20" cy="50" r="12" fill="#0f172a" />
+          <circle cx="80" cy="50" r="12" fill="#0f172a" />
+          {/* Forehead hair line */}
+          <path d="M26 48 Q50 36 74 48 Z" fill="#0f172a" />
+          {/* Left Eye: Wink */}
+          <path d="M33 63 Q39 58 45 63" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" fill="none" />
+          {/* Right Eye: Big round pupil */}
+          <circle cx="63" cy="61" r="3.5" fill="#0f172a" />
+          {/* Cheerful blush dashes */}
+          <line x1="28" y1="68" x2="34" y2="68" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="66" y1="68" x2="72" y2="68" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+          {/* Warm curved grin */}
+          <path d="M43 75 Q50 82 57 75" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        </>
+      )}
+
+      {/* Variant 5: Headphones (DJ / Gamer Over-Ear Headphones + Confident Grin) */}
+      {variant === 'headphones' && (
+        <>
+          {/* Spiky / Clean hair */}
+          <path d="M26 44 C26 22 74 22 74 44 Z" fill="#0f172a" />
+          <path d="M36 26 L42 16 L48 26 L56 16 L62 26" stroke="#0f172a" strokeWidth="2.5" strokeLinejoin="round" fill="#0f172a" />
+          {/* Headphone Arch */}
+          <path d="M16 50 C14 20 86 20 84 50" stroke="#0f172a" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+          {/* Left Ear Cup */}
+          <rect x="12" y="44" width="10" height="22" rx="5" fill="#0f172a" stroke="#0f172a" strokeWidth="1.5" />
+          {/* Right Ear Cup */}
+          <rect x="78" y="44" width="10" height="22" rx="5" fill="#0f172a" stroke="#0f172a" strokeWidth="1.5" />
+          {/* Eyes with cool arched brows */}
+          <circle cx="37" cy="58" r="3" fill="#0f172a" />
+          <circle cx="63" cy="58" r="3" fill="#0f172a" />
+          <path d="M32 52 L42 51" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M58 51 L68 52" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" />
+          {/* Confident side grin */}
+          <path d="M44 72 Q52 79 59 70" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" fill="none" />
         </>
       )}
     </svg>

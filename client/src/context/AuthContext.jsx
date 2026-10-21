@@ -102,11 +102,12 @@ export function AuthProvider({ children }) {
     }
     const name = email.split('@')[0];
     localStorage.setItem('omegle_user_name', name);
+    const savedAvatar = localStorage.getItem('omegle_user_avatar') || 'beanie';
     setUser({
       id: res.userId,
       email: res.email,
       displayName: name,
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+      avatar: savedAvatar,
       isModerator: res.isModerator,
       isGuest: false,
       isPro: false
@@ -123,11 +124,12 @@ export function AuthProvider({ children }) {
     }
     const name = email.split('@')[0];
     localStorage.setItem('omegle_user_name', name);
+    const savedAvatar = localStorage.getItem('omegle_user_avatar') || 'beanie';
     setUser({
       id: res.userId,
       email: res.email,
       displayName: name,
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+      avatar: savedAvatar,
       isModerator: res.isModerator,
       isGuest: false,
       isPro: false
