@@ -1095,8 +1095,53 @@ html, body {
 
 .chat-drawer-partner-status {
   font-size: 0.75rem;
-  font-weight: 600;
-  color: #10b981;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.chat-drawer-partner-status.live {
+  color: #16a34a;
+}
+
+.chat-drawer-partner-status.searching {
+  color: #d97706;
+}
+
+.chat-drawer-partner-status.disconnected,
+.chat-drawer-partner-status.offline {
+  color: #64748b;
+}
+
+.chat-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.chat-status-dot.live {
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  animation: livePulse 1.8s infinite;
+}
+
+.chat-status-dot.searching {
+  background: #f59e0b;
+  box-shadow: 0 0 6px #f59e0b;
+  animation: livePulse 1.2s infinite;
+}
+
+.chat-status-dot.disconnected {
+  background: #ef4444;
+}
+
+.chat-status-dot.offline {
+  background: #94a3b8;
 }
 
 .chat-drawer-close-btn {
@@ -1268,6 +1313,23 @@ html, body {
 .chat-drawer-input-pill:focus-within {
   transform: translate(-1px, -1px);
   box-shadow: 2.5px 2.5px 0px #0f172a;
+}
+
+.chat-drawer-input-pill.disabled {
+  background: #f8fafc;
+  opacity: 0.75;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.chat-drawer-input-pill.disabled input {
+  cursor: not-allowed;
+  color: #94a3b8;
+}
+
+.chat-drawer-input-pill.disabled:focus-within {
+  transform: none;
+  box-shadow: none;
 }
 
 .drawer-input-field {

@@ -44,7 +44,7 @@ export function App() {
         {currentView === 'call' ? (
           <>
             <LiveVideoStage webrtc={webrtc} />
-            <InCallChatDrawer />
+            <InCallChatDrawer webrtc={webrtc} />
           </>
         ) : (
           <LobbyScreen webrtc={webrtc} />

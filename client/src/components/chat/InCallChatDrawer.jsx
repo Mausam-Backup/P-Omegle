@@ -4,12 +4,50 @@ import { X, Send, Smile, User } from 'lucide-react';
 import { DoodleAvatarHead } from '../doodles/DoodleCharacter';
 import { EmojiPicker } from './EmojiPicker';
 
-export function InCallChatDrawer() {
-  const { isChatOpen, setIsChatOpen, messages, sendMessage, partner, isStrangerTyping, sendTypingStatus } = useChat();
+export function InCallChatDrawer({ webrtc }) {
+  const {
+    isChatOpen,
+    setIsChatOpen,
+    messages,
+    sendMessage,
+    partner,
+    isStrangerTyping,
+    sendTypingStatus,
+    chatStatus,
+    isLive,
+    partnerLeftInfo
+  } = useChat();
   const [inputText, setInputText] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Connection state determination
+  const isConnected = chatStatus === 'matched' && isLive;
+  const isSearching = chatStatus === 'searching';
+  const isPartnerLeft = chatStatus === 'partner_left' || chatStatus === 'ended' || !!partnerLeftInfo;
+
+  let statusText = 'User not connected';
+  let statusClass = 'offline';
+  let partnerDisplayName = 'Stranger';
+
+  if (isConnected) {
+    statusText = 'Connected live';
+    statusClass = 'live';
+    partnerDisplayName = partner?.name || 'Stranger';
+  } else if (isSearching) {
+    statusText = 'Connecting...';
+    statusClass = 'searching';
+    partnerDisplayName = 'Looking for match...';
+  } else if (isPartnerLeft) {
+    statusText = 'Stranger disconnected';
+    statusClass = 'disconnected';
+    partnerDisplayName = 'Stranger (Left)';
+  } else {
+    statusText = 'User not connected';
+    statusClass = 'offline';
+    partnerDisplayName = 'Stranger';
+  }
 
   // Scroll only the messages container - never the document/window
   useEffect(() => {
@@ -22,7 +60,7 @@ export function InCallChatDrawer() {
 
   const handleSend = (e) => {
     e.preventDefault();
-    if (!inputText.trim()) return;
+    if (!isConnected || !inputText.trim()) return;
     sendMessage(inputText);
     setInputText('');
     setShowEmojiPicker(false);
@@ -31,10 +69,13 @@ export function InCallChatDrawer() {
 
   const handleChange = (e) => {
     setInputText(e.target.value);
-    sendTypingStatus(e.target.value.length > 0);
+    if (isConnected) {
+      sendTypingStatus(e.target.value.length > 0);
+    }
   };
 
   const handleSelectEmoji = (emoji) => {
+    if (!isConnected) return;
     const input = inputRef.current;
     if (input) {
       const start = input.selectionStart ?? inputText.length;
@@ -60,8 +101,11 @@ export function InCallChatDrawer() {
         <div className="chat-drawer-partner-info">
           <DoodleAvatarHead seed="stranger" size={32} />
           <div>
-            <div className="chat-drawer-partner-name">{partner?.name || 'Stranger'}</div>
-            <div className="chat-drawer-partner-status">Connected live</div>
+            <div className="chat-drawer-partner-name">{partnerDisplayName}</div>
+            <div className={`chat-drawer-partner-status ${statusClass}`}>
+              <span className={`chat-status-dot ${statusClass}`} />
+              <span>{statusText}</span>
+            </div>
           </div>
         </div>
         <button
@@ -79,7 +123,15 @@ export function InCallChatDrawer() {
       <div className="chat-drawer-messages" ref={messagesContainerRef}>
         {messages.length === 0 ? (
           <div className="chat-drawer-empty-hint">
-            Say hi to Stranger! Messages are ephemeral and P2P encrypted.
+            {isConnected ? (
+              <>Say hi to Stranger! Messages are ephemeral and P2P encrypted.</>
+            ) : isSearching ? (
+              <>Looking for someone to connect with you...</>
+            ) : isPartnerLeft ? (
+              <>Stranger has disconnected. Tap <strong>Next</strong> on video stage to find someone new.</>
+            ) : (
+              <>User is not connected yet. Connect to a stranger to start texting.</>
+            )}
           </div>
         ) : (
           messages.map((msg) => {
@@ -95,19 +147,19 @@ export function InCallChatDrawer() {
           })
         )}
 
-        {isStrangerTyping && (
+        {isStrangerTyping && isConnected && (
           <div className="drawer-typing-indicator">
             <span className="dot"></span>
             <span className="dot"></span>
             <span className="dot"></span>
-            <span>{partner?.name || 'Stranger'} is typing...</span>
+            <span>{partnerDisplayName} is typing...</span>
           </div>
         )}
       </div>
 
       {/* Input Bar with Emoji Picker */}
       <div className="chat-drawer-input-container">
-        {showEmojiPicker && (
+        {showEmojiPicker && isConnected && (
           <EmojiPicker
             onSelectEmoji={handleSelectEmoji}
             onClose={() => setShowEmojiPicker(false)}
@@ -115,21 +167,23 @@ export function InCallChatDrawer() {
         )}
 
         <form onSubmit={handleSend} className="chat-drawer-input-form">
-          <div className="chat-drawer-input-pill">
+          <div className={`chat-drawer-input-pill ${!isConnected ? 'disabled' : ''}`}>
             <input
               ref={inputRef}
               type="text"
               className="drawer-input-field"
-              placeholder="Type a message..."
+              placeholder={isConnected ? "Type a message..." : "Waiting for connection..."}
               value={inputText}
               onChange={handleChange}
+              disabled={!isConnected}
             />
             <button
               type="button"
               className={`drawer-emoji-toggle-btn ${showEmojiPicker ? 'active' : ''}`}
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              title="Add emoji"
+              onClick={() => isConnected && setShowEmojiPicker(!showEmojiPicker)}
+              title={isConnected ? "Add emoji" : "User not connected"}
               aria-label="Add emoji"
+              disabled={!isConnected}
             >
               <Smile size={19} />
             </button>
@@ -138,8 +192,8 @@ export function InCallChatDrawer() {
           <button
             type="submit"
             className="drawer-send-btn"
-            disabled={!inputText.trim()}
-            title="Send message"
+            disabled={!isConnected || !inputText.trim()}
+            title={isConnected ? "Send message" : "User not connected"}
             aria-label="Send message"
           >
             <Send size={15} />
