@@ -1,0 +1,151 @@
+/* ==============================================================================
+   Huy Phan Style Push Loader Screen (O P Omegle)
+   Ultra-smooth, editorial split-screen preloader with walking character
+   ============================================================================== */
+
+@font-face {
+  font-family: 'BT Glyphius';
+  src: url('/fonts/BTGlyphius.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.push-loader-root {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 999999;
+  overflow: hidden;
+  pointer-events: auto;
+  user-select: none;
+  background: transparent;
+  --push-progress: 0;
+  --counter-push: 0px;
+}
+
+/* 1. Left Revealed Background Panel */
+.push-loader-panel-left {
+  position: absolute;
+  inset: 0;
+  background-color: #ffffff;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 2. Revealed Typography (Signature coral/red serif) */
+.push-loader-reveal-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 1;
+  color: #ff4949;
+  font-family: 'BT Glyphius', 'Playfair Display', 'Bodoni Moda', serif;
+  text-transform: uppercase;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 0.88;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+}
+
+.push-loader-text-line-1 {
+  font-size: clamp(3.5rem, 15vw, 12.5rem);
+  letter-spacing: 0.02em;
+}
+
+.push-loader-text-line-2 {
+  font-size: clamp(3.5rem, 15vw, 12.5rem);
+  letter-spacing: -0.02em;
+}
+
+/* 3. Sliding Black Curtain */
+.push-loader-curtain {
+  position: absolute;
+  inset: 0;
+  background-color: #000000;
+  z-index: 2;
+  will-change: left;
+  pointer-events: none;
+  left: calc(min(var(--panel-max-pct, 115%), max(0%, var(--push-progress) * 100%)));
+}
+
+/* 4. Pusher Character Track & Container */
+.push-loader-character-track {
+  position: absolute;
+  left: calc((var(--push-progress) * 100%) - var(--half-width, 107px));
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform: translate(-50%, -50%);
+  will-change: left;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.push-loader-character-box {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--character-width, 215px);
+  height: var(--character-height, 226px);
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.push-loader-character-box svg {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* 5. Percentage Counter */
+.push-loader-counter {
+  position: absolute;
+  right: var(--counter-inset-right, 36px);
+  top: 50%;
+  transform: translate3d(var(--counter-push, 0px), -50%, 0);
+  color: #ffffff;
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: transform;
+  font-family: 'BT Glyphius', 'Playfair Display', serif;
+  font-weight: 400;
+  font-size: clamp(2.8rem, 7vw, 6.2rem);
+  line-height: 0.8;
+  letter-spacing: 0em;
+  z-index: 4;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  padding-right: 6px;
+}
+
+/* Mobile Adjustments for Precision */
+@media (max-width: 768px) {
+  .push-loader-reveal-text {
+    line-height: 0.92;
+  }
+  
+  .push-loader-text-line-1,
+  .push-loader-text-line-2 {
+    font-size: clamp(3rem, 16vw, 5.5rem);
+  }
+
+  .push-loader-counter {
+    right: 22px;
+    font-size: clamp(2.4rem, 10vw, 4rem);
+  }
+}

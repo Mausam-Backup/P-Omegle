@@ -113,7 +113,7 @@ function createSilentAudioTrack() {
   }
 }
 
-export function useWebRTC() {
+export function useWebRTC({ autoInitCamera = true } = {}) {
   const { sessionId, peerRole, chatStatus, sendWs, registerSignalListener, iceServers } = useChat();
 
   const [localStream, setLocalStream] = useState(null);
@@ -127,7 +127,7 @@ export function useWebRTC() {
   const [facingMode, setFacingMode] = useState('user'); // 'user' (front) | 'environment' (back)
   const facingModeRef = useRef('user');
 
-  const [isCameraLoading, setIsCameraLoading] = useState(true);
+  const [isCameraLoading, setIsCameraLoading] = useState(autoInitCamera);
   const [cameraPermissionState, setCameraPermissionState] = useState('prompt'); // 'prompt' | 'granted' | 'denied' | 'error'
   const [cameraError, setCameraError] = useState(null);
 
@@ -282,8 +282,9 @@ export function useWebRTC() {
   }, []);
 
   useEffect(() => {
+    if (!autoInitCamera) return;
     initLocalMedia();
-  }, [initLocalMedia]);
+  }, [autoInitCamera, initLocalMedia]);
 
   // Ensure local tracks are attached whenever localStream is acquired or updated
   useEffect(() => {

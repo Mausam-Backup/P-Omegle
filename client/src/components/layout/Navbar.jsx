@@ -11,9 +11,16 @@ export function Navbar() {
   return (
     <header className="app-navbar">
       {/* Left: Hand-Drawn Doodle Logo */}
-      <div className="navbar-logo" onClick={() => setCurrentView('lobby')}>
+      <div
+        className="navbar-logo"
+        onClick={() => {
+          setCurrentView('lobby');
+          window.dispatchEvent(new CustomEvent('replay-loader'));
+        }}
+        title="O P Omegle - Click to replay intro"
+      >
         <DoodleLogoIcon size={34} />
-        <span className="navbar-brand-name">VideoChat</span>
+        <span className="navbar-brand-name">O P Omegle</span>
       </div>
 
       {/* Right Controls: Pro Pill & Profile Avatar */}
