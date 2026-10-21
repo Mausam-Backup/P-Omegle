@@ -2948,7 +2948,7 @@ html, body {
     padding: 0.85rem 0.85rem 0.5rem 0.85rem;
     gap: 0.5rem;
     border-right: none;
-    border-bottom: 2px solid #0f172a;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.12);
     flex: 1;
     min-height: 230px;
     display: flex;
@@ -2961,8 +2961,8 @@ html, body {
     height: 100%;
     max-height: none;
     border-radius: 16px;
-    border: 1.5px solid #0f172a;
-    box-shadow: 2px 2px 0px #0f172a;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    box-shadow: none;
   }
 
   .lobby-video-placeholder {
@@ -2986,11 +2986,15 @@ html, body {
 
   .preview-pill-btn {
     height: 34px;
-    padding: 0 11px;
+    padding: 0 12px;
     font-size: 0.75rem;
     gap: 0.35rem;
-    border: 1.5px solid #0f172a;
-    box-shadow: 1.5px 1.5px 0px #0f172a;
+    border: 1px solid rgba(15, 23, 42, 0.15);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  }
+
+  .preview-pill-btn:hover {
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
   }
 
   .preview-pill-btn svg {
@@ -3005,16 +3009,19 @@ html, body {
 
   .lobby-settings-section {
     padding: 0.85rem 1rem 1rem 1rem;
-    gap: 0.5rem;
+    gap: 0.55rem;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
   }
 
   .lobby-user-header {
-    padding-bottom: 0.5rem;
-    gap: 0.65rem;
-    border-bottom: 1.5px dashed #cbd5e1;
+    padding: 0.6rem 0.85rem;
+    gap: 0.75rem;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    box-shadow: none;
+    border-radius: 14px;
+    background: #ffffff;
   }
 
   .lobby-user-name {
@@ -3022,19 +3029,78 @@ html, body {
   }
 
   .lobby-interests-group {
-    margin: 0.35rem 0;
+    margin: 0.15rem 0;
+  }
+
+  .lobby-interests-toggle-btn {
+    padding: 0.55rem 0.85rem;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    box-shadow: none;
+    border-radius: 14px;
+    background: #ffffff;
+  }
+
+  .lobby-interests-toggle-btn:hover {
+    box-shadow: none;
+  }
+
+  .interests-count-pill {
+    background: #0f172a;
+    color: #ffffff;
+    border: none;
+    padding: 2px 7px;
+  }
+
+  .lobby-tags-container {
+    padding: 0.55rem;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    box-shadow: none;
+    border-radius: 14px;
+    background: #ffffff;
+  }
+
+  .lobby-tag-pill {
+    padding: 0.25rem 0.65rem;
+    border: 1px solid rgba(15, 23, 42, 0.16);
+    box-shadow: none;
+    background: #f8fafc;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .suggested-chip {
+    padding: 0.22rem 0.65rem;
+    font-size: 0.72rem;
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    box-shadow: none;
+    background: #ffffff;
+    font-weight: 600;
+  }
+
+  .suggested-chip:hover {
+    box-shadow: none;
   }
 
   .lobby-stats-row {
-    margin-bottom: 0.45rem;
+    margin-bottom: 0.25rem;
     font-size: 0.78rem;
-    gap: 0.35rem;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    box-shadow: none;
+    border-radius: 14px;
+    background: #ffffff;
   }
 
   .start-call-cta-btn {
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1rem;
     font-size: 0.95rem;
-    border-radius: 12px;
+    border-radius: 14px;
+    border: 1.5px solid #0f172a;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+  }
+
+  .start-call-cta-btn:hover {
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.24);
   }
 
   /* Live Stage Dual Video Stack */
