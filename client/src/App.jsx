@@ -6,7 +6,6 @@ import { LiveVideoStage } from './components/video/LiveVideoStage';
 import { InCallChatDrawer } from './components/chat/InCallChatDrawer';
 import { LobbyScreen } from './components/lobby/LobbyScreen';
 import { UserProfileModal } from './components/profile/UserProfileModal';
-import { ProModal } from './components/modals/ProModal';
 import { DeviceSettingsModal } from './components/modals/DeviceSettingsModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { InstallPwaPrompt } from './components/common/InstallPwaPrompt';
@@ -54,7 +53,6 @@ export function App() {
 
       {/* Modals & Dialogs */}
       <UserProfileModal />
-      <ProModal />
       <DeviceSettingsModal />
       <AuthModal />
     </>

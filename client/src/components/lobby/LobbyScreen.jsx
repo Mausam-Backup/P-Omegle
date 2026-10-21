@@ -92,6 +92,18 @@ export function LobbyScreen({ webrtc }) {
         {/* Left Side: Live Camera Test & Mic Checks */}
         <section className="lobby-preview-section" aria-label="Camera and audio preview test">
           <div className="lobby-video-box">
+            {/* Viewfinder Decorative Doodle Corners */}
+            <div className="viewfinder-corner top-left" aria-hidden="true" />
+            <div className="viewfinder-corner top-right" aria-hidden="true" />
+            <div className="viewfinder-corner bottom-left" aria-hidden="true" />
+            <div className="viewfinder-corner bottom-right" aria-hidden="true" />
+
+            {/* Top Status Badge */}
+            <div className="lobby-camera-badge">
+              <span className={`camera-live-pulse-dot ${!isPreviewLive ? 'standby' : ''}`} />
+              <span>{isPreviewLive ? 'LIVE PREVIEW' : isCameraLoading ? 'STARTING...' : 'CAMERA STANDBY'}</span>
+            </div>
+
             {isPreviewLive ? (
               <video
                 id="lobby-preview-video"
@@ -211,7 +223,6 @@ export function LobbyScreen({ webrtc }) {
             <div style={{ flex: 1 }}>
               <div className="lobby-user-name">
                 {user?.displayName || "You"}
-                {user?.isPro && <span className="pro-chip">PRO</span>}
               </div>
               <div className="lobby-user-sub">
                 {user?.isGuest ? 'Guest User' : user?.email} •{' '}
